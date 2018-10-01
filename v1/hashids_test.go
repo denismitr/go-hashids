@@ -17,7 +17,7 @@ func TestEndodeAndDecodeValuesAreEqual(t *testing.T) {
 		{"123 -> 123", 123, Decoded{[]int64{1}, nil}},
 	}
 
-	o := New(DefaultOptions())
+	o, _ := New(DefaultOptions())
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {

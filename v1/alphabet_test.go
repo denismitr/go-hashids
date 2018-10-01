@@ -11,13 +11,19 @@ func Test_DefaultLength(t *testing.T) {
 		length int
 	}{
 		{"1 gets padded to 8 symbols", int64(1), 8},
-		{"10 gets padded to 16 symbols", 10, 8},
+		{"10 gets padded to 16 symbols", 10, 16},
 	}
 
-	o := New(DefaultOptions())
+	options := DefaultOptions()
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
+			options.MinLength = tc.length
+			o, err := New(options)
+			if err != nil {
+				t.Fatal(err)
+			}
+
 			hash, err := o.Encode(tc.encode)
 			if err != nil {
 				t.Fatal(err)
