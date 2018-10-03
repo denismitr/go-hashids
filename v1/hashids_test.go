@@ -47,3 +47,44 @@ func TestEndodeAndDecodeValuesAreEqual(t *testing.T) {
 		})
 	}
 }
+
+func Test_DecodeWithKnownHash(t *testing.T) {
+	options := DefaultOptions()
+	options.Salt = "this is my salt"
+	options.MinLength = 0
+
+	obfuscator, _ := New(options)
+
+	hash := "7nnhzEsDkiYa"
+	result, err := obfuscator.Decode(hash).Unwrap()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("%v -> %v", hash, result)
+
+	expected := []int{45, 434, 1313, 99}
+	assert.Equal(t, expected, result)
+}
+
+func Test_DefaultOptions_Length(t *testing.T) {
+	options := DefaultOptions()
+	options.Salt = "this is my salt"
+
+	o, _ := New(options)
+
+	numbers := []int{45, 434, 1313, 99}
+	hash, err := o.Encode(numbers)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := o.Decode(hash).Unwrap()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("%v -> %v -> %v", numbers, hash, result)
+
+	assert.Equal(t, numbers, result)
+}

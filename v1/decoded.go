@@ -19,6 +19,10 @@ func (d Decoded) Error() string {
 	return d.err.Error()
 }
 
+func (d Decoded) Unwrap() ([]int64, error) {
+	return d.result, d.err
+}
+
 // Map over the results
 func (d Decoded) Map(f ResultMapFunc) Decoded {
 	result := make([]int64, len(d.result))

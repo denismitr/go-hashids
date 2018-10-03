@@ -1,6 +1,8 @@
 package hashids
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func createNumbersHashFor(slice []int64) int64 {
 	nh := int64(0)

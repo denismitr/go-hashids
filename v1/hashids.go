@@ -1,18 +1,11 @@
 package hashids
 
-import "fmt"
-
-const (
-	defaultAlphabet  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-	defaultMinLength = 8
-
-	sepDiv      = 3.5
-	guardDiv    = 12.0
-	defaultSeps = "cfhistuCFHISTU"
+import (
+	"fmt"
+	"math"
 )
 
-type Result []int64
-
+// Obfuscator is responsible for the encoding and decoding
 type Obfuscator struct {
 	options            Options
 	guards             []rune
@@ -20,13 +13,28 @@ type Obfuscator struct {
 	maxLengthPerNumber int
 }
 
-func New(options Options) (Obfuscator, error) {
-	guards := []rune{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'}
-	return Obfuscator{
-		options:            options,
-		guards:             guards,
-		maxLengthPerNumber: 5,
-	}, nil
+// New obfuscator
+func New(options Options) (*Obfuscator, error) {
+	err := options.Initialize()
+	if err != nil {
+		return nil, err
+	}
+
+	o := &Obfuscator{
+		options: options,
+		guards:  options.guards,
+		seps:    options.seps,
+	}
+
+	// Calculate the maximum possible string length by hashing the maximum possible id
+	encoded, err := o.Encode(math.MaxInt64)
+	if err != nil {
+		return nil, fmt.Errorf("unable to encode maximum int64 to find max encoded value length: %s", err)
+	}
+
+	o.maxLengthPerNumber = len(encoded)
+
+	return o, nil
 }
 
 // Encode number, numbers or slice of numbers
@@ -35,15 +43,15 @@ func (o Obfuscator) Encode(v ...interface{}) (string, error) {
 		return "", fmt.Errorf("expected at least 1 value")
 	}
 
-	var slice []int64
+	slice := make([]int64, 0)
 
 	for _, item := range v {
 		switch value := item.(type) {
 		case []int64:
 			slice = value
 		case []int:
-			for i, n := range value {
-				slice[i] = int64(n)
+			for _, n := range value {
+				slice = append(slice, int64(n))
 			}
 		case int64:
 			slice = []int64{value}
@@ -57,15 +65,17 @@ func (o Obfuscator) Encode(v ...interface{}) (string, error) {
 	return o.encodeSlice(slice)
 }
 
+// Decode string hash
 func (o Obfuscator) Decode(in string) Decoded {
 	hashRunes := splitHash([]rune(in), o.guards)
 	i := 0
-	if len(hashRunes) > 1 && len(hashRunes) < 4 {
-		i = 1
-	}
+	// if len(hashRunes) > 1 && len(hashRunes) < 4 {
+	// 	i = 1
+	// }
 
 	result := make([]int64, 0, 10)
 	breakdown := hashRunes[i]
+
 	if len(breakdown) > 0 {
 		lottery := breakdown[0]
 		breakdown = breakdown[1:]
@@ -77,7 +87,7 @@ func (o Obfuscator) Decode(in string) Decoded {
 			buf[0] = lottery
 			buf = append(buf, o.options.saltAsSlice()...)
 			buf = append(buf, alphabet...)
-			alphabet := shuffle(alphabet, buf[:len(alphabet)])
+			alphabet = shuffle(alphabet, buf[:len(alphabet)])
 			number, err := unhash(rs, alphabet)
 			if err != nil {
 				return Decoded{nil, err}
@@ -98,6 +108,10 @@ func (o Obfuscator) Decode(in string) Decoded {
 }
 
 func (o Obfuscator) encodeSlice(slice []int64) (string, error) {
+	if len(slice) == 0 {
+		return "", fmt.Errorf("cannot encode an empty slice")
+	}
+
 	for _, n := range slice {
 		if n < 0 {
 			return "", fmt.Errorf("negative numbers like %d are not allowed", n)
@@ -109,7 +123,6 @@ func (o Obfuscator) encodeSlice(slice []int64) (string, error) {
 	maxResultLength := o.getMaxResultLengthFor(slice)
 	lottery := alphabetSlice[numbersHash%int64(len(alphabetSlice))]
 	result := make([]rune, 0, maxResultLength)
-
 	buf := make([]rune, len(o.options.Alphabet)+len(o.options.Salt)+1)
 
 	for i, n := range slice {
