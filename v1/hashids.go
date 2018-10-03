@@ -57,6 +57,46 @@ func (o Obfuscator) Encode(v ...interface{}) (string, error) {
 	return o.encodeSlice(slice)
 }
 
+func (o Obfuscator) Decode(in string) Decoded {
+	hashRunes := splitHash([]rune(in), o.guards)
+	i := 0
+	if len(hashRunes) > 1 && len(hashRunes) < 4 {
+		i = 1
+	}
+
+	result := make([]int64, 0, 10)
+	breakdown := hashRunes[i]
+	if len(breakdown) > 0 {
+		lottery := breakdown[0]
+		breakdown = breakdown[1:]
+		hashRunes = splitHash(breakdown, o.seps)
+		alphabet := o.options.alphabetAsSlice()
+		buf := make([]rune, len(alphabet)+len(o.options.saltAsSlice()))
+		for _, rs := range hashRunes {
+			buf = buf[:1]
+			buf[0] = lottery
+			buf = append(buf, o.options.saltAsSlice()...)
+			buf = append(buf, alphabet...)
+			alphabet := shuffle(alphabet, buf[:len(alphabet)])
+			number, err := unhash(rs, alphabet)
+			if err != nil {
+				return Decoded{nil, err}
+			}
+			result = append(result, number)
+		}
+	}
+
+	check, _ := o.Encode(result)
+	if check != in {
+		return Decoded{
+			result: nil,
+			err:    fmt.Errorf("mismatch between encode and decode: %s -> %s, obtained result %v", check, in, result),
+		}
+	}
+
+	return Decoded{result, nil}
+}
+
 func (o Obfuscator) encodeSlice(slice []int64) (string, error) {
 	for _, n := range slice {
 		if n < 0 {
@@ -77,6 +117,7 @@ func (o Obfuscator) encodeSlice(slice []int64) (string, error) {
 		buf[0] = lottery
 		buf = append(buf, o.options.saltAsSlice()...)
 		buf = append(buf, alphabetSlice...)
+		alphabetSlice = shuffle(alphabetSlice, buf[:len(alphabetSlice)])
 		hashSlice := hash(n, alphabetSlice)
 		result = append(result, hashSlice...)
 
@@ -114,8 +155,4 @@ func (o Obfuscator) getMaxResultLengthFor(slice []int64) int {
 		return o.options.MinLength
 	}
 	return maxLength
-}
-
-func (o Obfuscator) Decode(hash string) Decoded {
-	return Decoded{}
 }

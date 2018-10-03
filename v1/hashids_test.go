@@ -9,12 +9,12 @@ import (
 
 func TestEndodeAndDecodeValuesAreEqual(t *testing.T) {
 	tt := []struct {
-		name    string
-		encode  interface{}
-		decoded Decoded
+		name   string
+		encode interface{}
+		result Decoded
 	}{
 		{"1 -> 1", 1, Decoded{[]int64{1}, nil}},
-		{"123 -> 123", 123, Decoded{[]int64{1}, nil}},
+		{"123 -> 123", 123, Decoded{[]int64{123}, nil}},
 	}
 
 	o, _ := New(DefaultOptions())
@@ -26,18 +26,22 @@ func TestEndodeAndDecodeValuesAreEqual(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			decoded := o.Decode(hash)
+			result := o.Decode(hash)
 
-			if decoded.Count() == 0 {
-				t.Fatalf(
-					"Expected result list to have %d items, instead there is %d",
-					tc.decoded.Count(),
-					decoded.Count())
+			if result.HasError() {
+				t.Fatal(result.Error())
 			}
 
-			decoded.Map(func(v int64, i int) int64 {
+			if result.Count() == 0 {
+				t.Fatalf(
+					"Expected result list to have %d items, instead there is %d",
+					tc.result.Count(),
+					result.Count())
+			}
+
+			result.Map(func(v int64, i int) int64 {
 				log.Fatal(v, i)
-				assert.Equal(t, v, tc.decoded.result[i])
+				assert.Equal(t, v, tc.result.result[i])
 				return v
 			})
 		})

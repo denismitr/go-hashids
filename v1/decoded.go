@@ -15,6 +15,10 @@ func (d Decoded) Count() int {
 	return len(d.result)
 }
 
+func (d Decoded) Error() string {
+	return d.err.Error()
+}
+
 // Map over the results
 func (d Decoded) Map(f ResultMapFunc) Decoded {
 	result := make([]int64, len(d.result))
