@@ -2,6 +2,7 @@ package hashids
 
 import (
 	"fmt"
+	"log"
 	"math"
 )
 
@@ -67,11 +68,11 @@ func (o Obfuscator) Encode(v ...interface{}) (string, error) {
 
 // Decode string hash
 func (o Obfuscator) Decode(in string) Decoded {
-	hashRunes := splitHash([]rune(in), o.guards)
+	hashRunes := separate([]rune(in), o.guards)
 	i := 0
-	// if len(hashRunes) > 1 && len(hashRunes) < 4 {
-	// 	i = 1
-	// }
+	if len(hashRunes) > 1 && len(hashRunes) < 4 {
+		i = 1
+	}
 
 	result := make([]int64, 0, 10)
 	breakdown := hashRunes[i]
@@ -79,13 +80,13 @@ func (o Obfuscator) Decode(in string) Decoded {
 	if len(breakdown) > 0 {
 		lottery := breakdown[0]
 		breakdown = breakdown[1:]
-		hashRunes = splitHash(breakdown, o.seps)
-		alphabet := o.options.alphabetAsSlice()
-		buf := make([]rune, len(alphabet)+len(o.options.saltAsSlice()))
+		hashRunes = separate(breakdown, o.seps)
+		alphabet := o.options.alphabet
+		buf := make([]rune, len(alphabet)+len(o.options.salt))
 		for _, rs := range hashRunes {
 			buf = buf[:1]
 			buf[0] = lottery
-			buf = append(buf, o.options.saltAsSlice()...)
+			buf = append(buf, o.options.salt...)
 			buf = append(buf, alphabet...)
 			alphabet = shuffle(alphabet, buf[:len(alphabet)])
 			number, err := unhash(rs, alphabet)
@@ -118,23 +119,26 @@ func (o Obfuscator) encodeSlice(slice []int64) (string, error) {
 		}
 	}
 
-	alphabetSlice := o.options.alphabetAsSlice()
+	alphabet := o.options.alphabetCopy()
 	numbersHash := createNumbersHashFor(slice)
 	maxResultLength := o.getMaxResultLengthFor(slice)
-	lottery := alphabetSlice[numbersHash%int64(len(alphabetSlice))]
+	lottery := alphabet[numbersHash%int64(len(alphabet))]
 	result := make([]rune, 0, maxResultLength)
-	buf := make([]rune, len(o.options.Alphabet)+len(o.options.Salt)+1)
+	buf := make([]rune, len(alphabet)+len(o.options.salt)+1)
+
+	log.Printf("\nAlph: %s\n numsHash: %d\n maxResultLength: %d\n lottery: %d", string(alphabet), numbersHash, maxResultLength, lottery)
 
 	for i, n := range slice {
 		buf = buf[:1]
 		buf[0] = lottery
 		buf = append(buf, o.options.saltAsSlice()...)
-		buf = append(buf, alphabetSlice...)
-		alphabetSlice = shuffle(alphabetSlice, buf[:len(alphabetSlice)])
-		hashSlice := hash(n, alphabetSlice)
+		buf = append(buf, alphabet...)
+		alphabet = shuffle(alphabet, buf[:len(alphabet)])
+
+		hashSlice := hash(n, alphabet)
 		result = append(result, hashSlice...)
 
-		if i < len(slice)-1 {
+		if i < len(slice) {
 			n %= int64(hashSlice[0]) + int64(i)
 			result = append(result, o.seps[n%int64(len(o.seps))])
 		}
@@ -144,15 +148,16 @@ func (o Obfuscator) encodeSlice(slice []int64) (string, error) {
 		i := (numbersHash + int64(result[0])) % int64(len(o.guards))
 		result = append([]rune{o.guards[i]}, result...)
 
-		if len(result) < o.options.MinLength && len(result) > 2 {
+		if len(result) < o.options.MinLength {
 			i := (numbersHash + int64(result[2])) % int64(len(o.guards))
 			result = append(result, o.guards[i])
 		}
 	}
 
-	middle := len(alphabetSlice) / 2
+	middle := len(alphabet) / 2
 	for len(result) < o.options.MinLength {
-		result = append(alphabetSlice[middle:], append(result, alphabetSlice[:middle]...)...)
+		alphabet = shuffle(alphabet, alphabet)
+		result = append(alphabet[middle:], append(result, alphabet[:middle]...)...)
 		excess := len(result) - o.options.MinLength
 		if excess > 0 {
 			result = result[excess/2 : excess/2+o.options.MinLength]

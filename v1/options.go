@@ -22,20 +22,24 @@ type Options struct {
 	Salt      string
 
 	alphabet []rune
+	salt     []rune
 	seps     []rune
 	guards   []rune
 }
 
 // DefaultOptions for the obfuscator
-func DefaultOptions() Options {
+func DefaultOptions(salt string) Options {
 	return Options{
 		Alphabet:  defaultAlphabet,
 		MinLength: defaultMinLength,
+		Salt:      salt,
 	}
 }
 
 // Initialize alphabet, seps, guards
 func (o *Options) Initialize() error {
+	o.salt = []rune(o.Salt)
+
 	err := o.initializeAlphabet()
 	if err != nil {
 		return err
@@ -69,6 +73,12 @@ func (o *Options) initializeAlphabet() error {
 	return nil
 }
 
+func (o Options) alphabetCopy() []rune {
+	cp := make([]rune, len(o.alphabet))
+	copy(cp, o.alphabet)
+	return cp
+}
+
 // AlphabetAsSlice to use in algotithm
 func (o Options) alphabetAsSlice() []rune {
 	return o.alphabet
@@ -76,7 +86,7 @@ func (o Options) alphabetAsSlice() []rune {
 
 // SaltAsSlice to use in algotithm
 func (o Options) saltAsSlice() []rune {
-	return []rune(o.Salt)
+	return o.salt
 }
 
 func (o *Options) createSeps() {

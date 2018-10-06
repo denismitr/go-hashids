@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func Test_DefaultLength(t *testing.T) {
+func Test_MinLengthPadding(t *testing.T) {
 	tt := []struct {
 		name   string
 		encode interface{}
@@ -12,9 +12,10 @@ func Test_DefaultLength(t *testing.T) {
 	}{
 		{"1 gets padded to 8 symbols", int64(1), 8},
 		{"10 gets padded to 16 symbols", 10, 16},
+		{"36 gets padded to 36 symbols", []int{10, 23, 56}, 36},
 	}
 
-	options := DefaultOptions()
+	options := DefaultOptions("test salt")
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {

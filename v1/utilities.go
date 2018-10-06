@@ -12,8 +12,8 @@ func createNumbersHashFor(slice []int64) int64 {
 	return nh
 }
 
-func hash(in int64, alphabet []rune) (out []rune) {
-	out = make([]rune, 0)
+func hash(in int64, alphabet []rune) []rune {
+	out := make([]rune, 0)
 	alphabetLength := int64(len(alphabet))
 
 	for {
@@ -54,7 +54,7 @@ func unhash(in, alphabet []rune) (out int64, err error) {
 	return
 }
 
-func splitHash(in, seps []rune) (out [][]rune) {
+func separate(in, seps []rune) (out [][]rune) {
 	indicies := make([]int, 0)
 	for i, r := range in {
 		for _, s := range seps {
@@ -82,7 +82,8 @@ func shuffle(in, salt []rune) (out []rune) {
 		return
 	}
 
-	out = in
+	out = make([]rune, len(in))
+	copy(out, in)
 	p, v := 0, 0
 
 	for i := len(in) - 1; i > 0; i-- {

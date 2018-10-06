@@ -1,13 +1,12 @@
 package hashids
 
 import (
-	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestEndodeAndDecodeValuesAreEqual(t *testing.T) {
+func Test_EndodeAndDecodeValuesAreEqual(t *testing.T) {
 	tt := []struct {
 		name   string
 		encode interface{}
@@ -17,10 +16,11 @@ func TestEndodeAndDecodeValuesAreEqual(t *testing.T) {
 		{"123 -> 123", 123, Decoded{[]int64{123}, nil}},
 	}
 
-	o, _ := New(DefaultOptions())
+	o, _ := New(DefaultOptions("test salt"))
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
+
 			hash, err := o.Encode(tc.encode)
 			if err != nil {
 				t.Fatal(err)
@@ -40,8 +40,7 @@ func TestEndodeAndDecodeValuesAreEqual(t *testing.T) {
 			}
 
 			result.Map(func(v int64, i int) int64 {
-				log.Fatal(v, i)
-				assert.Equal(t, v, tc.result.result[i])
+				assert.Equal(t, tc.result.result[i], v)
 				return v
 			})
 		})
@@ -49,8 +48,7 @@ func TestEndodeAndDecodeValuesAreEqual(t *testing.T) {
 }
 
 func Test_DecodeWithKnownHash(t *testing.T) {
-	options := DefaultOptions()
-	options.Salt = "this is my salt"
+	options := DefaultOptions("this is my salt")
 	options.MinLength = 0
 
 	obfuscator, _ := New(options)
@@ -68,8 +66,7 @@ func Test_DecodeWithKnownHash(t *testing.T) {
 }
 
 func Test_DefaultOptions_Length(t *testing.T) {
-	options := DefaultOptions()
-	options.Salt = "this is my salt"
+	options := DefaultOptions("this is my salt")
 
 	o, _ := New(options)
 
