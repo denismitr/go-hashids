@@ -19,8 +19,29 @@ func (d Decoded) Error() string {
 	return d.err.Error()
 }
 
+// Unwrap the raw result and error
 func (d Decoded) Unwrap() ([]int64, error) {
 	return d.result, d.err
+}
+
+// AsInt slice
+func (d Decoded) AsInt() []int {
+	if d.result == nil {
+		return nil
+	}
+
+	out := make([]int, 0)
+
+	for _, v := range d.result {
+		out = append(out, int(v))
+	}
+
+	return out
+}
+
+// AsInt64 slice
+func (d Decoded) AsInt64() []int64 {
+	return d.result
 }
 
 // Map over the results

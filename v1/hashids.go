@@ -2,7 +2,6 @@ package hashids
 
 import (
 	"fmt"
-	"log"
 	"math"
 )
 
@@ -55,9 +54,9 @@ func (o Obfuscator) Encode(v ...interface{}) (string, error) {
 				slice = append(slice, int64(n))
 			}
 		case int64:
-			slice = []int64{value}
+			slice = append(slice, int64(value))
 		case int:
-			slice = []int64{int64(value)}
+			slice = append(slice, int64(value))
 		default:
 			return "", fmt.Errorf("Value must be of type int64")
 		}
@@ -70,7 +69,7 @@ func (o Obfuscator) Encode(v ...interface{}) (string, error) {
 func (o Obfuscator) Decode(in string) Decoded {
 	hashRunes := separate([]rune(in), o.guards)
 	i := 0
-	if len(hashRunes) > 1 && len(hashRunes) < 4 {
+	if len(hashRunes) == 2 || len(hashRunes) == 3 {
 		i = 1
 	}
 
@@ -81,8 +80,8 @@ func (o Obfuscator) Decode(in string) Decoded {
 		lottery := breakdown[0]
 		breakdown = breakdown[1:]
 		hashRunes = separate(breakdown, o.seps)
-		alphabet := o.options.alphabet
-		buf := make([]rune, len(alphabet)+len(o.options.salt))
+		alphabet := o.options.alphabetCopy()
+		buf := make([]rune, len(alphabet)+len(o.options.saltCopy()))
 		for _, rs := range hashRunes {
 			buf = buf[:1]
 			buf[0] = lottery
@@ -124,21 +123,20 @@ func (o Obfuscator) encodeSlice(slice []int64) (string, error) {
 	maxResultLength := o.getMaxResultLengthFor(slice)
 	lottery := alphabet[numbersHash%int64(len(alphabet))]
 	result := make([]rune, 0, maxResultLength)
+	result = append(result, lottery)
 	buf := make([]rune, len(alphabet)+len(o.options.salt)+1)
-
-	log.Printf("\nAlph: %s\n numsHash: %d\n maxResultLength: %d\n lottery: %d", string(alphabet), numbersHash, maxResultLength, lottery)
 
 	for i, n := range slice {
 		buf = buf[:1]
 		buf[0] = lottery
-		buf = append(buf, o.options.saltAsSlice()...)
+		buf = append(buf, o.options.saltCopy()...)
 		buf = append(buf, alphabet...)
 		alphabet = shuffle(alphabet, buf[:len(alphabet)])
 
 		hashSlice := hash(n, alphabet)
 		result = append(result, hashSlice...)
 
-		if i < len(slice) {
+		if i < len(slice)-1 {
 			n %= int64(hashSlice[0]) + int64(i)
 			result = append(result, o.seps[n%int64(len(o.seps))])
 		}

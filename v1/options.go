@@ -85,8 +85,10 @@ func (o Options) alphabetAsSlice() []rune {
 }
 
 // SaltAsSlice to use in algotithm
-func (o Options) saltAsSlice() []rune {
-	return o.salt
+func (o Options) saltCopy() (out []rune) {
+	out = make([]rune, len(o.salt))
+	copy(out, o.salt)
+	return
 }
 
 func (o *Options) createSeps() {
@@ -109,7 +111,7 @@ func (o *Options) createSeps() {
 		}
 	}
 
-	o.seps = shuffle(o.seps, o.saltAsSlice())
+	o.seps = shuffle(o.seps, o.saltCopy())
 
 	if len(o.seps) == 0 || float64(len(o.alphabet))/float64(len(o.seps)) > sepDiv {
 		sepsLength := int(math.Ceil(float64(len(o.alphabet)) / sepDiv))
@@ -126,7 +128,7 @@ func (o *Options) createSeps() {
 		}
 	}
 
-	o.alphabet = shuffle(o.alphabet, o.saltAsSlice())
+	o.alphabet = shuffle(o.alphabet, o.saltCopy())
 }
 
 func (o *Options) createGuards() {
