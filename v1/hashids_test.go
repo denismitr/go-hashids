@@ -60,6 +60,102 @@ func Test_EndodedAndDecodedValuesAreEqual(t *testing.T) {
 	}
 }
 
+func Test_EncodeReturnsCorrectHash(t *testing.T) {
+	t.Parallel()
+
+	tt := []struct {
+		input  interface{}
+		hash   string
+		salt   string
+		length int
+	}{
+		{[]int{45, 434, 1313, 99}, "7nnhzEsDkiYa", "this is my salt", 8},
+		{[]int{45, 434, 1313, 99}, "nG7nnhzEsDkiYadK", "this is my salt", 16},
+		{1, "B0NV05", "this is my salt", 6},
+		{1, "QGQ707", "this is another salt", 6},
+		{[]int{1}, "B0NV05", "this is my salt", 6},
+		{2, "yLA6m0oM", "this is my salt", 8},
+		{[]int64{2}, "yLA6m0oM", "this is my salt", 8},
+		{1, "JEDngB0NV05ev1Ww", "this is my salt", 16},
+		{1, "b9qVeQGQ707ay8Kl", "this is another salt", 16},
+		{1000, "Xzjd5vJGvO", "this is my salt", 10},
+		{[]int64{1000}, "Xzjd5vJGvO", "this is my salt", 10},
+		{[]int64{1, 10, 1000}, "40rlHmFyQd", "this is my salt", 10},
+		{[]int64{1, 10, 1000}, "303gcXFo60", "this is another salt", 10},
+		{[]int64{2, 24, 234567810}, "nG2fJTDWGebV", "test salt", 12},
+		{[]int64{2, 24, 234567810}, "w9XIviZljBvY", "another test salt", 12},
+		{[]int64{2, 24, 234567810}, "rBwGnG2fJTDWGebVP24d", "test salt", 20},
+	}
+
+	for _, tc := range tt {
+		t.Run(fmt.Sprintf("%v", tc.input), func(t *testing.T) {
+			options := Options{
+				MinLength: tc.length,
+				Salt:      tc.salt,
+			}
+
+			o, err := New(options)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			hash, err := o.Encode(tc.input)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			assert.Equal(t, tc.hash, hash)
+		})
+	}
+}
+
+func Test_EncodeReturnsCorrectInput(t *testing.T) {
+	t.Parallel()
+
+	tt := []struct {
+		output []int64
+		hash   string
+		salt   string
+		length int
+	}{
+		{[]int64{45, 434, 1313, 99}, "7nnhzEsDkiYa", "this is my salt", 8},
+		{[]int64{45, 434, 1313, 99}, "nG7nnhzEsDkiYadK", "this is my salt", 16},
+		{[]int64{1}, "B0NV05", "this is my salt", 6},
+		{[]int64{1}, "QGQ707", "this is another salt", 6},
+		{[]int64{1}, "EDngB0NV05ev1W", "this is my salt", 14},
+		{[]int64{2}, "yLA6m0oM", "this is my salt", 8},
+		{[]int64{1}, "JEDngB0NV05ev1Ww", "this is my salt", 16},
+		{[]int64{1}, "b9qVeQGQ707ay8Kl", "this is another salt", 16},
+		{[]int64{1000}, "Xzjd5vJGvO", "this is my salt", 10},
+		{[]int64{1, 10, 1000}, "40rlHmFyQd", "this is my salt", 10},
+		{[]int64{1, 10, 1000}, "303gcXFo60", "this is another salt", 10},
+		{[]int64{2, 24, 234567810}, "nG2fJTDWGebV", "test salt", 12},
+		{[]int64{2, 24, 234567810}, "w9XIviZljBvY", "another test salt", 12},
+		{[]int64{2, 24, 234567810}, "rBwGnG2fJTDWGebVP24d", "test salt", 20},
+	}
+
+	for _, tc := range tt {
+		t.Run(fmt.Sprintf("%s", tc.hash), func(t *testing.T) {
+			options := Options{
+				MinLength: tc.length,
+				Salt:      tc.salt,
+			}
+
+			o, err := New(options)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			result, err := o.Decode(tc.hash).Unwrap()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			assert.Equal(t, tc.output, result)
+		})
+	}
+}
+
 func Test_ErrorOnDecode(t *testing.T) {
 	tt := []struct {
 		alphabet string

@@ -7,8 +7,9 @@ import (
 )
 
 const (
-	defaultAlphabet  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-	defaultMinLength = 16
+	defaultAlphabet   = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+	defaultMinLength  = 16
+	absoluteMinLength = 6
 
 	sepDiv      = 3.5
 	guardDiv    = 12.0
@@ -38,6 +39,14 @@ func DefaultOptions(salt string) Options {
 
 // Initialize alphabet, seps, guards
 func (o *Options) Initialize() error {
+	if o.MinLength < absoluteMinLength {
+		return fmt.Errorf("Min length must be not less than %d", absoluteMinLength)
+	}
+
+	if o.Alphabet == "" {
+		o.Alphabet = defaultAlphabet
+	}
+
 	o.salt = []rune(o.Salt)
 
 	err := o.initializeAlphabet()
@@ -52,6 +61,7 @@ func (o *Options) Initialize() error {
 }
 
 func (o *Options) initializeAlphabet() error {
+
 	if len(o.Alphabet) < o.MinLength {
 		return fmt.Errorf("alphabet must bt at least %d characters long", o.MinLength)
 	}
