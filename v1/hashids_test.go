@@ -3,13 +3,14 @@ package hashids
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/speps/go-hashids"
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_EndodeAndDecodeValuesAreEqual(t *testing.T) {
+func Test_EndodedAndDecodedValuesAreEqual(t *testing.T) {
 	t.Parallel()
 
 	tt := []struct {
@@ -54,6 +55,76 @@ func Test_EndodeAndDecodeValuesAreEqual(t *testing.T) {
 
 			if !reflect.DeepEqual(actual, tc.out) {
 				t.Fatalf("Expected result to be %v items, instead got %v", tc.out, actual)
+			}
+		})
+	}
+}
+
+func Test_ErrorOnDecode(t *testing.T) {
+	tt := []struct {
+		alphabet string
+		hash     string
+		err      string
+	}{
+		{"Alphabet1234567890", "uuuiQO", "alphabet that was used for hashing was different"},
+		{"Alphabet1234567890", "QQAlphabet", "alphabet that was used for hashing was different"},
+		{"Alphabet1234567890", "CPQAlphabet34", "alphabet that was used for hashing was different"},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.alphabet+"_"+tc.hash, func(t *testing.T) {
+			options := DefaultOptions("test salt")
+			options.Alphabet = tc.alphabet
+			options.MinLength = 8
+
+			o, err := New(options)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			decoded, err := o.Decode(tc.hash).Unwrap()
+			if decoded != nil {
+				t.Fatalf("expected nil, got %v", decoded)
+			}
+
+			if err.Error() != tc.err {
+				t.Fatalf("excpected error message to be %s, got %s", tc.err, err.Error())
+			}
+		})
+	}
+}
+
+func Test_SaltError(t *testing.T) {
+	tt := []struct {
+		encodeSalt string
+		decodeSalt string
+		input      interface{}
+	}{
+		{"salt A", "salt B", 2},
+		{"test salt", "wrong salt", 1345},
+		{"good salt", "bad salt", []int{40, 1239, 456}},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.encodeSalt+"~>"+tc.decodeSalt, func(t *testing.T) {
+			options := DefaultOptions(tc.encodeSalt)
+			o, _ := New(options)
+
+			hash, err := o.Encode(tc.input)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			options = DefaultOptions(tc.decodeSalt)
+			o, _ = New(options)
+
+			result, err := o.Decode(hash).Unwrap()
+			if result != nil {
+				t.Fatalf("expected result to be nil, got %v", result)
+			}
+
+			if !strings.Contains(err.Error(), "mismatch between encoded and decoded values") {
+				t.Fatalf("expected mismatch error, got %v", err)
 			}
 		})
 	}

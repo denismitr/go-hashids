@@ -76,6 +76,10 @@ func (o Obfuscator) Decode(in string) Decoded {
 	result := make([]int64, 0, 10)
 	breakdown := hashRunes[i]
 
+	if len(breakdown) == 0 {
+		breakdown = hashRunes[0]
+	}
+
 	if len(breakdown) > 0 {
 		lottery := breakdown[0]
 		breakdown = breakdown[1:]
@@ -100,7 +104,7 @@ func (o Obfuscator) Decode(in string) Decoded {
 	if check != in {
 		return Decoded{
 			result: nil,
-			err:    fmt.Errorf("mismatch between encode and decode: %s -> %s, obtained result %v", check, in, result),
+			err:    fmt.Errorf("mismatch between encoded and decoded values: %s -> %s, obtained result %v", check, in, result),
 		}
 	}
 
