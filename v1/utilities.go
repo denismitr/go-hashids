@@ -1,6 +1,7 @@
 package hashids
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 )
@@ -196,4 +197,54 @@ func hashInPlace(input int64, alphabet []rune, result []rune) []rune {
 		result[i], result[opp] = result[opp], result[i]
 	}
 	return result
+}
+
+func hexToNums(hex string) ([]int64, error) {
+	nums := make([]int64, len(hex))
+
+	for i := 0; i < len(hex); i++ {
+		b := hex[i]
+		switch {
+		case (b >= '0') && (b <= '9'):
+			b -= '0'
+		case (b >= 'a') && (b <= 'f'):
+			b -= 'a' - 'A'
+			fallthrough
+		case (b >= 'A') && (b <= 'F'):
+			b -= ('A' - 0xA)
+		default:
+			return nil, fmt.Errorf("invalid hex digit")
+		}
+		// Each int is in range [16, 31]
+		nums[i] = 0x10 + int64(b)
+	}
+
+	return nums, nil
+}
+
+func numsToHex(nums []int64) (string, error) {
+	const hex = "0123456789abcdef"
+
+	b := make([]byte, len(nums))
+
+	for i, n := range nums {
+		if n < 0x10 || n > 0x1f {
+			return "", fmt.Errorf("invalid number")
+		}
+		b[i] = hex[n-0x10]
+	}
+
+	return string(b), nil
+}
+
+func isHex(s string) bool {
+	_, err := hex.DecodeString(s)
+	if err != nil {
+		_, err := hex.DecodeString(s + "1")
+		if err != nil {
+			return false
+		}
+	}
+
+	return true
 }

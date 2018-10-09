@@ -2,16 +2,19 @@ package hashids
 
 type ResultMapFunc func(v int64, i int) int64
 
+// Decoded hash result
 type Decoded struct {
 	result []int64
 	err    error
 }
 
+// HasError - whether result contains error
 func (d Decoded) HasError() bool {
 	return d.err != nil
 }
 
-func (d Decoded) Count() int {
+// Len of result
+func (d Decoded) Len() int {
 	return len(d.result)
 }
 
@@ -24,8 +27,8 @@ func (d Decoded) Unwrap() ([]int64, error) {
 	return d.result, d.err
 }
 
-// AsInt slice
-func (d Decoded) AsInt() []int {
+// AsIntSlice slice
+func (d Decoded) AsIntSlice() []int {
 	if d.result == nil {
 		return nil
 	}
@@ -39,9 +42,14 @@ func (d Decoded) AsInt() []int {
 	return out
 }
 
-// AsInt64 slice
-func (d Decoded) AsInt64() []int64 {
+// AsInt64Slice slice
+func (d Decoded) AsInt64Slice() []int64 {
 	return d.result
+}
+
+// AsHex returns result converted to hexidecimal format
+func (d Decoded) AsHex() (string, error) {
+	return numsToHex(d.result)
 }
 
 // Map over the results

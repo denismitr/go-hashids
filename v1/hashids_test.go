@@ -44,14 +44,14 @@ func Test_EndodedAndDecodedValuesAreEqual(t *testing.T) {
 				t.Fatal(result.Error())
 			}
 
-			if result.Count() == 0 {
+			if result.Len() == 0 {
 				t.Fatalf(
 					"Expected result list to have %d items, instead there is %d",
 					len(tc.out),
-					result.Count())
+					result.Len())
 			}
 
-			actual := result.AsInt64()
+			actual := result.AsInt64Slice()
 
 			if !reflect.DeepEqual(actual, tc.out) {
 				t.Fatalf("Expected result to be %v items, instead got %v", tc.out, actual)
@@ -282,9 +282,49 @@ func Test_ComperativeDecode(t *testing.T) {
 	options.MinLength = 30
 
 	o, _ := New(options)
-	actual := o.Decode(hash).AsInt()
+	actual := o.Decode(hash).AsIntSlice()
 
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("\nOn input %s expected: %#v, got %#v", hash, expected, actual)
+	}
+}
+
+func Test_HexEncodedAndDecodedValuesAreEqual(t *testing.T) {
+	tt := []struct {
+		hex      string
+		expected string
+		salt     string
+		length   int
+	}{
+		{"5a74d76ac89b05000e977baa", "qmTqfesOIqHrsoCYf9UkFZixSKuBT4umuruXuMiDsVsbSrfV", "this is my salt", 30},
+		{"5a74d76ac89b05000e977baa", "r6sdC0iBF5IXiZU3CQuLT1HJSofDs3fvfMfXfdHjivibS8Cw", "test salt", 18},
+		{"111aff", "5JqQ5h6hYhjCyhgqjL", "test salt", 18},
+		{"111affe", "Yzx1hmh6hKCyhvhNPb", "test salt", 18},
+		{"1a", "XBe7QdP7Wh5PMa8Ojy", "test salt", 18},
+		{"1", "O35oKBgz41PVdL9MQA", "test salt", 18},
+		{"2", "9VbdrOYnAYnxDlLEWj", "test salt", 18},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.hex, func(t *testing.T) {
+			options := DefaultOptions(tc.salt)
+			options.MinLength = tc.length
+
+			o, _ := New(options)
+
+			hash, err := o.Encode(tc.hex)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			assert.Equal(t, tc.expected, hash)
+
+			hex, err := o.Decode(hash).AsHex()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			assert.Equal(t, tc.hex, hex)
+		})
 	}
 }

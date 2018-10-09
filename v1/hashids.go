@@ -57,8 +57,18 @@ func (o Obfuscator) Encode(v ...interface{}) (string, error) {
 			slice = append(slice, int64(value))
 		case int:
 			slice = append(slice, int64(value))
+		case string:
+			if isHex(value) {
+				nums, err := hexToNums(value)
+				if err != nil {
+					return "", err
+				}
+				slice = nums
+			} else {
+				return "", fmt.Errorf("unkown format of string")
+			}
 		default:
-			return "", fmt.Errorf("Value must be of type int64")
+			return "", fmt.Errorf("Value must be of type int, int64 or slice of ints, or hex")
 		}
 	}
 
