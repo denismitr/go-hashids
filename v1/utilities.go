@@ -3,7 +3,6 @@ package hashids
 import (
 	"errors"
 	"fmt"
-	"log"
 )
 
 func createNumbersHashFor(slice []int64) int64 {
@@ -37,7 +36,6 @@ func hash(in int64, alphabet []rune) []rune {
 
 func unhash(in, alphabet []rune) (out int64, err error) {
 	for _, r := range in {
-		log.Println(string(r))
 		pos := -1
 		for i, s := range alphabet {
 			if r == s {

@@ -226,24 +226,6 @@ func Test_SaltError(t *testing.T) {
 	}
 }
 
-func Test_DecodeWithKnownHash(t *testing.T) {
-	options := DefaultOptions("this is my salt")
-	options.MinLength = 0
-
-	obfuscator, _ := New(options)
-
-	hash := "7nnhzEsDkiYa"
-	result, err := obfuscator.Decode(hash).Unwrap()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	t.Logf("%v -> %v", hash, result)
-
-	expected := []int64{45, 434, 1313, 99}
-	assert.Equal(t, expected, result)
-}
-
 func Test_DefaultOptions_Length(t *testing.T) {
 	options := DefaultOptions("this is my salt")
 
