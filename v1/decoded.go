@@ -2,40 +2,53 @@ package hashids
 
 type ResultMapFunc func(v int64, i int) int64
 
-// Decoded hash result
-type Decoded struct {
-	result []int64
-	err    error
+// DecodedNumbers hash result
+type DecodedNumbers struct {
+	numbers []int64
+	err     error
+}
+
+// NewDecodedNumbers result
+func NewDecodedNumbers(numbers []int64, err error) *DecodedNumbers {
+	d := new(DecodedNumbers)
+	d.err = err
+
+	if numbers != nil {
+		d.numbers = make([]int64, len(numbers))
+		copy(d.numbers, numbers)
+	}
+
+	return d
 }
 
 // HasError - whether result contains error
-func (d Decoded) HasError() bool {
+func (d DecodedNumbers) HasError() bool {
 	return d.err != nil
 }
 
 // Len of result
-func (d Decoded) Len() int {
-	return len(d.result)
+func (d DecodedNumbers) Len() int {
+	return len(d.numbers)
 }
 
-func (d Decoded) Error() string {
+func (d DecodedNumbers) Error() string {
 	return d.err.Error()
 }
 
 // Unwrap the raw result and error
-func (d Decoded) Unwrap() ([]int64, error) {
-	return d.result, d.err
+func (d DecodedNumbers) Unwrap() ([]int64, error) {
+	return d.numbers, d.err
 }
 
 // AsIntSlice slice
-func (d Decoded) AsIntSlice() []int {
-	if d.result == nil {
+func (d DecodedNumbers) AsIntSlice() []int {
+	if d.numbers == nil {
 		return nil
 	}
 
 	out := make([]int, 0)
 
-	for _, v := range d.result {
+	for _, v := range d.numbers {
 		out = append(out, int(v))
 	}
 
@@ -43,22 +56,22 @@ func (d Decoded) AsIntSlice() []int {
 }
 
 // AsInt64Slice slice
-func (d Decoded) AsInt64Slice() []int64 {
-	return d.result
+func (d DecodedNumbers) AsInt64Slice() []int64 {
+	return d.numbers
 }
 
 // AsHex returns result converted to hexidecimal format
-func (d Decoded) AsHex() (string, error) {
-	return numsToHex(d.result)
+func (d DecodedNumbers) AsHex() (string, error) {
+	return numsToHex(d.numbers)
 }
 
 // Map over the results
-func (d Decoded) Map(f ResultMapFunc) Decoded {
-	result := make([]int64, len(d.result))
+func (d DecodedNumbers) Map(f ResultMapFunc) DecodedNumbers {
+	result := make([]int64, len(d.numbers))
 
-	for i, v := range d.result {
+	for i, v := range d.numbers {
 		result[i] = f(v, i)
 	}
 
-	return Decoded{result, nil}
+	return DecodedNumbers{result, nil}
 }

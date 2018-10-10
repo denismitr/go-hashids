@@ -76,14 +76,15 @@ func (h *Hasher) Encode(v ...interface{}) (string, error) {
 }
 
 // Decode string hash
-func (h Hasher) Decode(input string) Decoded {
+func (h *Hasher) Decode(input string) *DecodedNumbers {
+	h.reset()
+
 	hashRunes := separate([]rune(input), h.options.guards)
 	i := 0
 	if len(hashRunes) == 2 || len(hashRunes) == 3 {
 		i = 1
 	}
 
-	result := make([]int64, 0, 10)
 	breakdown := hashRunes[i]
 
 	if len(breakdown) == 0 {
@@ -95,30 +96,27 @@ func (h Hasher) Decode(input string) Decoded {
 		breakdown = breakdown[1:]
 		hashRunes = separate(breakdown, h.options.seps)
 		alphabet := h.options.alphabetCopy()
-		buf := make([]rune, len(alphabet)+len(h.options.salt))
 		for _, rs := range hashRunes {
-			buf = buf[:1]
-			buf[0] = lottery
-			buf = append(buf, h.options.salt...)
-			buf = append(buf, alphabet...)
-			alphabet = shuffle(alphabet, buf[:len(alphabet)])
+			h.buf = h.buf[:1]
+			h.buf[0] = lottery
+			h.buf = append(h.buf, h.options.salt...)
+			h.buf = append(h.buf, alphabet...)
+			alphabet = shuffle(alphabet, h.buf[:len(alphabet)])
 			number, err := unhash(rs, alphabet)
 			if err != nil {
-				return Decoded{nil, err}
+				return NewDecodedNumbers(nil, err)
 			}
-			result = append(result, number)
+			h.numbers = append(h.numbers, number)
 		}
 	}
 
-	check, _ := h.Encode(result)
+	check, _ := h.Encode(h.numbers)
 	if check != input {
-		return Decoded{
-			result: nil,
-			err:    fmt.Errorf("mismatch between encoded and decoded values: %s -> %s, obtained result %v", check, input, result),
-		}
+		return NewDecodedNumbers(nil,
+			fmt.Errorf("mismatch between encoded and decoded values: %s -> %s, obtained result %v", check, input, h.numbers))
 	}
 
-	return Decoded{result, nil}
+	return NewDecodedNumbers(h.numbers, nil)
 }
 
 func (h *Hasher) encodeNumbers() (string, error) {
