@@ -5,65 +5,65 @@ import (
 	"math"
 )
 
-// Obfuscator is responsible for the encoding and decoding
-type Obfuscator struct {
+// Hasher is responsible for the encoding and decoding
+type Hasher struct {
 	options            Options
-	guards             []rune
-	seps               []rune
 	maxLengthPerNumber int
+
+	numbers []int64
+	hash    []rune
+	buf     []rune
 }
 
 // New obfuscator
-func New(options Options) (*Obfuscator, error) {
+func New(options Options) (*Hasher, error) {
 	err := options.Initialize()
 	if err != nil {
 		return nil, err
 	}
 
-	o := &Obfuscator{
+	h := &Hasher{
 		options: options,
-		guards:  options.guards,
-		seps:    options.seps,
 	}
 
 	// Calculate the maximum possible string length by hashing the maximum possible id
-	encoded, err := o.Encode(math.MaxInt64)
+	encoded, err := h.Encode(math.MaxInt64)
 	if err != nil {
 		return nil, fmt.Errorf("unable to encode maximum int64 to find max encoded value length: %s", err)
 	}
 
-	o.maxLengthPerNumber = len(encoded)
+	h.maxLengthPerNumber = len(encoded)
 
-	return o, nil
+	return h, nil
 }
 
 // Encode number, numbers or slice of numbers
-func (o Obfuscator) Encode(v ...interface{}) (string, error) {
+func (h *Hasher) Encode(v ...interface{}) (string, error) {
+	h.reset()
+
 	if len(v) == 0 {
 		return "", fmt.Errorf("expected at least 1 value")
 	}
 
-	slice := make([]int64, 0)
-
 	for _, item := range v {
 		switch value := item.(type) {
 		case []int64:
-			slice = value
+			h.numbers = value
 		case []int:
 			for _, n := range value {
-				slice = append(slice, int64(n))
+				h.numbers = append(h.numbers, int64(n))
 			}
 		case int64:
-			slice = append(slice, int64(value))
+			h.numbers = append(h.numbers, int64(value))
 		case int:
-			slice = append(slice, int64(value))
+			h.numbers = append(h.numbers, int64(value))
 		case string:
 			if isHex(value) {
 				nums, err := hexToNums(value)
 				if err != nil {
 					return "", err
 				}
-				slice = nums
+				h.numbers = nums
 			} else {
 				return "", fmt.Errorf("unkown format of string")
 			}
@@ -72,12 +72,12 @@ func (o Obfuscator) Encode(v ...interface{}) (string, error) {
 		}
 	}
 
-	return o.encodeSlice(slice)
+	return h.encodeNumbers()
 }
 
 // Decode string hash
-func (o Obfuscator) Decode(in string) Decoded {
-	hashRunes := separate([]rune(in), o.guards)
+func (h Hasher) Decode(input string) Decoded {
+	hashRunes := separate([]rune(input), h.options.guards)
 	i := 0
 	if len(hashRunes) == 2 || len(hashRunes) == 3 {
 		i = 1
@@ -93,13 +93,13 @@ func (o Obfuscator) Decode(in string) Decoded {
 	if len(breakdown) > 0 {
 		lottery := breakdown[0]
 		breakdown = breakdown[1:]
-		hashRunes = separate(breakdown, o.seps)
-		alphabet := o.options.alphabetCopy()
-		buf := make([]rune, len(alphabet)+len(o.options.saltCopy()))
+		hashRunes = separate(breakdown, h.options.seps)
+		alphabet := h.options.alphabetCopy()
+		buf := make([]rune, len(alphabet)+len(h.options.salt))
 		for _, rs := range hashRunes {
 			buf = buf[:1]
 			buf[0] = lottery
-			buf = append(buf, o.options.salt...)
+			buf = append(buf, h.options.salt...)
 			buf = append(buf, alphabet...)
 			alphabet = shuffle(alphabet, buf[:len(alphabet)])
 			number, err := unhash(rs, alphabet)
@@ -110,79 +110,84 @@ func (o Obfuscator) Decode(in string) Decoded {
 		}
 	}
 
-	check, _ := o.Encode(result)
-	if check != in {
+	check, _ := h.Encode(result)
+	if check != input {
 		return Decoded{
 			result: nil,
-			err:    fmt.Errorf("mismatch between encoded and decoded values: %s -> %s, obtained result %v", check, in, result),
+			err:    fmt.Errorf("mismatch between encoded and decoded values: %s -> %s, obtained result %v", check, input, result),
 		}
 	}
 
 	return Decoded{result, nil}
 }
 
-func (o Obfuscator) encodeSlice(slice []int64) (string, error) {
-	if len(slice) == 0 {
-		return "", fmt.Errorf("cannot encode an empty slice")
+func (h *Hasher) encodeNumbers() (string, error) {
+	if len(h.numbers) == 0 {
+		return "", fmt.Errorf("cannot encode an empty slice of numbers")
 	}
 
-	for _, n := range slice {
+	for _, n := range h.numbers {
 		if n < 0 {
 			return "", fmt.Errorf("negative numbers like %d are not allowed", n)
 		}
 	}
 
-	alphabet := o.options.alphabetCopy()
-	numbersHash := createNumbersHashFor(slice)
-	maxResultLength := o.getMaxResultLengthFor(slice)
+	alphabet := h.options.alphabetCopy()
+	numbersHash := createNumbersHashFor(h.numbers)
 	lottery := alphabet[numbersHash%int64(len(alphabet))]
-	result := make([]rune, 0, maxResultLength)
-	result = append(result, lottery)
-	buf := make([]rune, len(alphabet)+len(o.options.salt)+1)
 
-	for i, n := range slice {
-		buf = buf[:1]
-		buf[0] = lottery
-		buf = append(buf, o.options.saltCopy()...)
-		buf = append(buf, alphabet...)
-		alphabet = shuffle(alphabet, buf[:len(alphabet)])
+	h.hash = append(h.hash, lottery)
+
+	for i, n := range h.numbers {
+		h.buf = h.buf[:1]
+		h.buf[0] = lottery
+		h.buf = append(h.buf, h.options.saltCopy()...)
+		h.buf = append(h.buf, alphabet...)
+		alphabet = shuffle(alphabet, h.buf[:len(alphabet)])
 
 		hashSlice := hash(n, alphabet)
-		result = append(result, hashSlice...)
+		h.hash = append(h.hash, hashSlice...)
 
-		if i < len(slice)-1 {
+		if i < len(h.numbers)-1 {
 			n %= int64(hashSlice[0]) + int64(i)
-			result = append(result, o.seps[n%int64(len(o.seps))])
+			h.hash = append(h.hash, h.options.seps[n%int64(len(h.options.seps))])
 		}
 	}
 
-	if len(result) < o.options.MinLength {
-		i := (numbersHash + int64(result[0])) % int64(len(o.guards))
-		result = append([]rune{o.guards[i]}, result...)
+	if len(h.hash) < h.options.MinLength {
+		i := (numbersHash + int64(h.hash[0])) % int64(len(h.options.guards))
+		h.hash = append([]rune{h.options.guards[i]}, h.hash...)
 
-		if len(result) < o.options.MinLength {
-			i := (numbersHash + int64(result[2])) % int64(len(o.guards))
-			result = append(result, o.guards[i])
+		if len(h.hash) < h.options.MinLength {
+			i := (numbersHash + int64(h.hash[2])) % int64(len(h.options.guards))
+			h.hash = append(h.hash, h.options.guards[i])
 		}
 	}
 
 	middle := len(alphabet) / 2
-	for len(result) < o.options.MinLength {
+	for len(h.hash) < h.options.MinLength {
 		alphabet = shuffle(alphabet, alphabet)
-		result = append(alphabet[middle:], append(result, alphabet[:middle]...)...)
-		excess := len(result) - o.options.MinLength
+		h.hash = append(alphabet[middle:], append(h.hash, alphabet[:middle]...)...)
+		excess := len(h.hash) - h.options.MinLength
 		if excess > 0 {
-			result = result[excess/2 : excess/2+o.options.MinLength]
+			h.hash = h.hash[excess/2 : excess/2+h.options.MinLength]
 		}
 	}
 
-	return string(result), nil
+	return string(h.hash), nil
 }
 
-func (o Obfuscator) getMaxResultLengthFor(slice []int64) int {
-	maxLength := o.maxLengthPerNumber * len(slice)
-	if maxLength < o.options.MinLength {
-		return o.options.MinLength
+func (h Hasher) getMaxResultLengthFor(slice []int64) int {
+	maxLength := h.maxLengthPerNumber * len(slice)
+	if maxLength < h.options.MinLength {
+		return h.options.MinLength
 	}
 	return maxLength
+}
+
+// reset the hash
+func (h *Hasher) reset() {
+	h.numbers = make([]int64, 0)
+	h.hash = make([]rune, 0, h.options.MinLength)
+	h.buf = make([]rune, 0, len(h.options.alphabet)+len(h.options.salt)+1)
 }

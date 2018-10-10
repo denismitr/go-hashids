@@ -83,18 +83,14 @@ func (o *Options) initializeAlphabet() error {
 	return nil
 }
 
+// AlphabetAsSlice to use in algotithm
 func (o Options) alphabetCopy() []rune {
 	cp := make([]rune, len(o.alphabet))
 	copy(cp, o.alphabet)
 	return cp
 }
 
-// AlphabetAsSlice to use in algotithm
-func (o Options) alphabetAsSlice() []rune {
-	return o.alphabet
-}
-
-// SaltAsSlice to use in algotithm
+// saltCopy to use in algotithm
 func (o Options) saltCopy() (out []rune) {
 	out = make([]rune, len(o.salt))
 	copy(out, o.salt)
