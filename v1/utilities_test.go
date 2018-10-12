@@ -7,6 +7,8 @@ import (
 )
 
 func Test_HashFunc(t *testing.T) {
+	t.Parallel()
+
 	tt := []struct {
 		input    int64
 		alphabet []rune
@@ -29,6 +31,8 @@ func Test_HashFunc(t *testing.T) {
 	}
 
 	for _, tc := range tt {
+		tc := tc
+
 		t.Run(strconv.Itoa(int(tc.input)), func(t *testing.T) {
 			actual := hash(tc.input, tc.alphabet)
 
@@ -40,6 +44,8 @@ func Test_HashFunc(t *testing.T) {
 }
 
 func Test_UnhashFucn(t *testing.T) {
+	t.Parallel()
+
 	tt := []struct {
 		result   int64
 		alphabet []rune
@@ -62,6 +68,8 @@ func Test_UnhashFucn(t *testing.T) {
 	}
 
 	for _, tc := range tt {
+		tc := tc
+
 		t.Run(string(tc.input), func(t *testing.T) {
 			actual, err := unhash(tc.input, tc.alphabet)
 			if err != nil {
@@ -76,6 +84,8 @@ func Test_UnhashFucn(t *testing.T) {
 }
 
 func Test_SplitHashFunc(t *testing.T) {
+	t.Parallel()
+
 	tt := []struct {
 		seps     string
 		input    []rune
@@ -91,6 +101,8 @@ func Test_SplitHashFunc(t *testing.T) {
 	}
 
 	for _, tc := range tt {
+		tc := tc
+
 		t.Run(string(tc.input), func(t *testing.T) {
 			actual := separate(tc.input, []rune(tc.seps))
 
@@ -102,6 +114,8 @@ func Test_SplitHashFunc(t *testing.T) {
 }
 
 func Test_ShuffleFunc(t *testing.T) {
+	t.Parallel()
+
 	tt := []struct {
 		in   []rune
 		out  []rune
@@ -130,6 +144,8 @@ func Test_ShuffleFunc(t *testing.T) {
 	}
 
 	for _, tc := range tt {
+		tc := tc
+
 		t.Run(string(tc.in), func(t *testing.T) {
 			expected := make([]rune, len(tc.out))
 			copy(expected, tc.out)
