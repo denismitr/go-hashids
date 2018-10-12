@@ -99,7 +99,8 @@ func (o Options) saltCopy() (out []rune) {
 func (o *Options) calculateSeps() {
 	o.seps = []rune(defaultSeps)
 
-	// seps should contain only characters present in alphabet; alphabet should not contains seps
+	// seps should contain only characters present in alphabet
+	// alphabet should not contain seps
 	for i := 0; i < len(o.seps); i++ {
 		foundIndex := -1
 		for j, a := range o.alphabet {

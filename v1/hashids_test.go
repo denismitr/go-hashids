@@ -6,7 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/speps/go-hashids"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,6 +30,7 @@ func Test_EndodedAndDecodedValuesAreEqual(t *testing.T) {
 	o, _ := New(DefaultOptions("test salt"))
 
 	for _, tc := range tt {
+		tc := tc
 		t.Run(fmt.Sprintf("Input %v output %v", tc.in, tc.out), func(t *testing.T) {
 
 			hash, err := o.Encode(tc.in)
@@ -88,6 +88,8 @@ func Test_EncodeReturnsCorrectHash(t *testing.T) {
 	}
 
 	for _, tc := range tt {
+		tc := tc
+
 		t.Run(fmt.Sprintf("%v", tc.input), func(t *testing.T) {
 			options := Options{
 				Length: tc.length,
@@ -135,6 +137,8 @@ func Test_EncodeReturnsCorrectInput(t *testing.T) {
 	}
 
 	for _, tc := range tt {
+		tc := tc
+
 		t.Run(fmt.Sprintf("%s", tc.hash), func(t *testing.T) {
 			options := Options{
 				Length: tc.length,
@@ -168,6 +172,8 @@ func Test_ErrorOnDecode(t *testing.T) {
 	}
 
 	for _, tc := range tt {
+		tc := tc
+
 		t.Run(tc.alphabet+"_"+tc.hash, func(t *testing.T) {
 			options := DefaultOptions("test salt")
 			options.Alphabet = tc.alphabet
@@ -202,6 +208,8 @@ func Test_SaltError(t *testing.T) {
 	}
 
 	for _, tc := range tt {
+		tc := tc
+
 		t.Run(tc.encodeSalt+"~>"+tc.decodeSalt, func(t *testing.T) {
 			options := DefaultOptions(tc.encodeSalt)
 			o, _ := New(options)
@@ -249,46 +257,6 @@ func Test_DefaultOptions_Length(t *testing.T) {
 	assert.Equal(t, numbers, result)
 }
 
-func Test_ComperativeEncode(t *testing.T) {
-	hd := hashids.NewData()
-	hd.Salt = "this is my salt"
-	hd.MinLength = 30
-	h, _ := hashids.NewWithData(hd)
-	e, _ := h.Encode([]int{45, 434, 1313, 99})
-
-	options := DefaultOptions("this is my salt")
-	options.Length = 30
-
-	o, _ := New(options)
-
-	numbers := []int{45, 434, 1313, 99}
-	hash, _ := o.Encode(numbers)
-
-	if hash != e {
-		t.Fatalf("\nActual: %s, expected %s", hash, e)
-	}
-}
-
-func Test_ComperativeDecode(t *testing.T) {
-	hash := "woQ2vqjnG7nnhzEsDkiYadKa3O71br"
-
-	hd := hashids.NewData()
-	hd.Salt = "this is my salt"
-	hd.MinLength = 30
-	h, _ := hashids.NewWithData(hd)
-	expected := h.Decode(hash)
-
-	options := DefaultOptions("this is my salt")
-	options.Length = 30
-
-	o, _ := New(options)
-	actual := o.Decode(hash).AsIntSlice()
-
-	if !reflect.DeepEqual(expected, actual) {
-		t.Fatalf("\nOn input %s expected: %#v, got %#v", hash, expected, actual)
-	}
-}
-
 func Test_HexEncodedAndDecodedValuesAreEqual(t *testing.T) {
 	tt := []struct {
 		hex      string
@@ -307,6 +275,8 @@ func Test_HexEncodedAndDecodedValuesAreEqual(t *testing.T) {
 	}
 
 	for _, tc := range tt {
+		tc := tc
+
 		t.Run(tc.hex, func(t *testing.T) {
 			options := DefaultOptions(tc.salt)
 			options.Length = tc.length

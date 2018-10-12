@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func createNumbersHashFor(slice []int64) int64 {
+func createNumbersHashInt(slice []int64) int64 {
 	nh := int64(0)
 	for i, n := range slice {
 		nh += (n % int64(i+100))

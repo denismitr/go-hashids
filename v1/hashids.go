@@ -131,8 +131,8 @@ func (h *Hasher) encodeNumbers() (string, error) {
 	}
 
 	alphabet := h.options.alphabetCopy()
-	numbersHash := createNumbersHashFor(h.numbers)
-	lottery := alphabet[numbersHash%int64(len(alphabet))]
+	numbersHashInt := createNumbersHashInt(h.numbers)
+	lottery := alphabet[numbersHashInt%int64(len(alphabet))]
 	salt := h.options.saltCopy()
 
 	h.hash = append(h.hash, lottery)
@@ -153,7 +153,7 @@ func (h *Hasher) encodeNumbers() (string, error) {
 		}
 	}
 
-	h.extendHash(alphabet, numbersHash)
+	h.extendHash(alphabet, numbersHashInt)
 
 	return string(h.hash), nil
 }
