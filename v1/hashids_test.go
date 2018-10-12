@@ -90,8 +90,8 @@ func Test_EncodeReturnsCorrectHash(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(fmt.Sprintf("%v", tc.input), func(t *testing.T) {
 			options := Options{
-				MinLength: tc.length,
-				Salt:      tc.salt,
+				Length: tc.length,
+				Salt:   tc.salt,
 			}
 
 			o, err := New(options)
@@ -137,8 +137,8 @@ func Test_EncodeReturnsCorrectInput(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(fmt.Sprintf("%s", tc.hash), func(t *testing.T) {
 			options := Options{
-				MinLength: tc.length,
-				Salt:      tc.salt,
+				Length: tc.length,
+				Salt:   tc.salt,
 			}
 
 			o, err := New(options)
@@ -171,7 +171,7 @@ func Test_ErrorOnDecode(t *testing.T) {
 		t.Run(tc.alphabet+"_"+tc.hash, func(t *testing.T) {
 			options := DefaultOptions("test salt")
 			options.Alphabet = tc.alphabet
-			options.MinLength = 8
+			options.Length = 8
 
 			o, err := New(options)
 			if err != nil {
@@ -257,7 +257,7 @@ func Test_ComperativeEncode(t *testing.T) {
 	e, _ := h.Encode([]int{45, 434, 1313, 99})
 
 	options := DefaultOptions("this is my salt")
-	options.MinLength = 30
+	options.Length = 30
 
 	o, _ := New(options)
 
@@ -279,7 +279,7 @@ func Test_ComperativeDecode(t *testing.T) {
 	expected := h.Decode(hash)
 
 	options := DefaultOptions("this is my salt")
-	options.MinLength = 30
+	options.Length = 30
 
 	o, _ := New(options)
 	actual := o.Decode(hash).AsIntSlice()
@@ -308,7 +308,7 @@ func Test_HexEncodedAndDecodedValuesAreEqual(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.hex, func(t *testing.T) {
 			options := DefaultOptions(tc.salt)
-			options.MinLength = tc.length
+			options.Length = tc.length
 
 			o, _ := New(options)
 

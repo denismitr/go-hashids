@@ -25,7 +25,7 @@ func Test_MinLengthPadding(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			options.MinLength = tc.length
+			options.Length = tc.length
 			o, err := New(options)
 			if err != nil {
 				t.Fatal(err)
@@ -63,7 +63,7 @@ func Test_CustomAlphabet(t *testing.T) {
 	for _, alph := range alphs {
 		t.Run(fmt.Sprintf("Alphabet %s", alph), func(t *testing.T) {
 			options := DefaultOptions("test salt")
-			options.MinLength = 8
+			options.Length = 8
 			options.Alphabet = alph
 
 			o, err := New(options)

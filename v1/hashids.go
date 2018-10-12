@@ -17,7 +17,7 @@ type Hasher struct {
 
 // New obfuscator
 func New(options Options) (*Hasher, error) {
-	err := options.Initialize()
+	err := options.initialize()
 	if err != nil {
 		return nil, err
 	}
@@ -152,23 +152,23 @@ func (h *Hasher) encodeNumbers() (string, error) {
 		}
 	}
 
-	if len(h.hash) < h.options.MinLength {
+	if len(h.hash) < h.options.Length {
 		i := (numbersHash + int64(h.hash[0])) % int64(len(h.options.guards))
 		h.hash = append([]rune{h.options.guards[i]}, h.hash...)
 
-		if len(h.hash) < h.options.MinLength {
+		if len(h.hash) < h.options.Length {
 			i := (numbersHash + int64(h.hash[2])) % int64(len(h.options.guards))
 			h.hash = append(h.hash, h.options.guards[i])
 		}
 	}
 
 	middle := len(alphabet) / 2
-	for len(h.hash) < h.options.MinLength {
+	for len(h.hash) < h.options.Length {
 		alphabet = shuffle(alphabet, alphabet)
 		h.hash = append(alphabet[middle:], append(h.hash, alphabet[:middle]...)...)
-		excess := len(h.hash) - h.options.MinLength
+		excess := len(h.hash) - h.options.Length
 		if excess > 0 {
-			h.hash = h.hash[excess/2 : excess/2+h.options.MinLength]
+			h.hash = h.hash[excess/2 : excess/2+h.options.Length]
 		}
 	}
 
@@ -177,8 +177,8 @@ func (h *Hasher) encodeNumbers() (string, error) {
 
 func (h Hasher) getMaxResultLengthFor(slice []int64) int {
 	maxLength := h.maxLengthPerNumber * len(slice)
-	if maxLength < h.options.MinLength {
-		return h.options.MinLength
+	if maxLength < h.options.Length {
+		return h.options.Length
 	}
 	return maxLength
 }
@@ -186,6 +186,6 @@ func (h Hasher) getMaxResultLengthFor(slice []int64) int {
 // reset the hash
 func (h *Hasher) reset() {
 	h.numbers = make([]int64, 0)
-	h.hash = make([]rune, 0, h.options.MinLength)
+	h.hash = make([]rune, 0, h.options.Length)
 	h.buf = make([]rune, 0, len(h.options.alphabet)+len(h.options.salt)+1)
 }
