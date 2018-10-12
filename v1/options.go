@@ -3,7 +3,6 @@ package hashids
 import (
 	"fmt"
 	"math"
-	"strings"
 )
 
 const (
@@ -39,48 +38,48 @@ func DefaultOptions(salt string) Options {
 
 // initialize alphabet, seps, guards
 func (o *Options) initialize() error {
-	if o.Alphabet == "" {
-		o.Alphabet = defaultAlphabet
-	}
-
-	if len(o.Alphabet) < minAlphabetLength {
-		return fmt.Errorf("Alphabet length must be at least %d", minAlphabetLength)
-	}
-
-	o.salt = []rune(o.Salt)
-
-	err := o.initializeAlphabet()
+	alphabet, err := o.validateAlphabet()
 	if err != nil {
 		return err
 	}
 
-	o.createSeps()
+	o.salt = []rune(o.Salt)
+	o.alphabet = alphabet
+
+	o.calculateSeps()
 	o.createGuards()
 
 	return nil
 }
 
-func (o *Options) initializeAlphabet() error {
+func (o Options) validateAlphabet() ([]rune, error) {
+	var alphabetRunes []rune
 
-	if len(o.Alphabet) < o.Length {
-		return fmt.Errorf("alphabet must bt at least %d characters long", o.Length)
+	if o.Alphabet == "" {
+		alphabetRunes = []rune(defaultAlphabet)
+	} else {
+		alphabetRunes = []rune(o.Alphabet)
 	}
 
-	if strings.Contains(o.Alphabet, " ") {
-		return fmt.Errorf("alphabet may not contain empty spaces")
+	if len(alphabetRunes) < minAlphabetLength {
+		return nil, fmt.Errorf("Alphabet length must be at least %d", minAlphabetLength)
 	}
 
-	o.alphabet = []rune(o.Alphabet)
+	unique := make(map[rune]bool, len(alphabetRunes))
 
-	unique := make(map[rune]bool, len(o.alphabet))
-	for _, r := range o.alphabet {
+	for _, r := range alphabetRunes {
 		if _, ok := unique[r]; ok {
-			return fmt.Errorf("duplicate character in alphabet: %s", string([]rune{r}))
+			return nil, fmt.Errorf("duplicate character in alphabet: %s", string([]rune{r}))
 		}
+
+		if r == ' ' {
+			return nil, fmt.Errorf("alphabet may not contain empty spaces")
+		}
+
 		unique[r] = true
 	}
 
-	return nil
+	return alphabetRunes, nil
 }
 
 // AlphabetAsSlice to use in algotithm
@@ -97,7 +96,7 @@ func (o Options) saltCopy() (out []rune) {
 	return
 }
 
-func (o *Options) createSeps() {
+func (o *Options) calculateSeps() {
 	o.seps = []rune(defaultSeps)
 
 	// seps should contain only characters present in alphabet; alphabet should not contains seps

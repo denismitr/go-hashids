@@ -302,6 +302,7 @@ func Test_HexEncodedAndDecodedValuesAreEqual(t *testing.T) {
 		{"111affe", "Yzx1hmh6hKCyhvhNPb", "test salt", 18},
 		{"1a", "XBe7QdP7Wh5PMa8Ojy", "test salt", 18},
 		{"1", "O35oKBgz41PVdL9MQA", "test salt", 18},
+		{"1", "gz41PV", "test salt", 6},
 		{"2", "9VbdrOYnAYnxDlLEWj", "test salt", 18},
 	}
 

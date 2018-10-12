@@ -133,13 +133,14 @@ func (h *Hasher) encodeNumbers() (string, error) {
 	alphabet := h.options.alphabetCopy()
 	numbersHash := createNumbersHashFor(h.numbers)
 	lottery := alphabet[numbersHash%int64(len(alphabet))]
+	salt := h.options.saltCopy()
 
 	h.hash = append(h.hash, lottery)
 
 	for i, n := range h.numbers {
 		h.buf = h.buf[:1]
 		h.buf[0] = lottery
-		h.buf = append(h.buf, h.options.saltCopy()...)
+		h.buf = append(h.buf, salt...)
 		h.buf = append(h.buf, alphabet...)
 		alphabet = shuffle(alphabet, h.buf[:len(alphabet)])
 
@@ -152,6 +153,12 @@ func (h *Hasher) encodeNumbers() (string, error) {
 		}
 	}
 
+	h.extendHash(alphabet, numbersHash)
+
+	return string(h.hash), nil
+}
+
+func (h *Hasher) extendHash(alphabet []rune, numbersHash int64) {
 	if len(h.hash) < h.options.Length {
 		i := (numbersHash + int64(h.hash[0])) % int64(len(h.options.guards))
 		h.hash = append([]rune{h.options.guards[i]}, h.hash...)
@@ -171,8 +178,6 @@ func (h *Hasher) encodeNumbers() (string, error) {
 			h.hash = h.hash[excess/2 : excess/2+h.options.Length]
 		}
 	}
-
-	return string(h.hash), nil
 }
 
 func (h Hasher) getMaxResultLengthFor(slice []int64) int {
