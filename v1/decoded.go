@@ -40,8 +40,8 @@ func (d DecodedNumbers) Unwrap() ([]int64, error) {
 	return d.numbers, d.err
 }
 
-// AsIntSlice slice
-func (d DecodedNumbers) AsIntSlice() []int {
+// IntSlice from result
+func (d DecodedNumbers) IntSlice() []int {
 	if d.numbers == nil {
 		return nil
 	}
@@ -55,8 +55,24 @@ func (d DecodedNumbers) AsIntSlice() []int {
 	return out
 }
 
-// AsInt64Slice slice
-func (d DecodedNumbers) AsInt64Slice() []int64 {
+func (d DecodedNumbers) FirstInt() (first int) {
+	if len(d.numbers) > 0 {
+		first = int(d.numbers[0])
+	}
+
+	return
+}
+
+func (d DecodedNumbers) FirstInt64() (first int64) {
+	if len(d.numbers) > 0 {
+		first = d.numbers[0]
+	}
+
+	return
+}
+
+// Int64Slice slice
+func (d DecodedNumbers) Int64Slice() []int64 {
 	return d.numbers
 }
 

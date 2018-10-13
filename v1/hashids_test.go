@@ -52,7 +52,7 @@ func Test_EndodedAndDecodedValuesAreEqual(t *testing.T) {
 					result.Len())
 			}
 
-			actual := result.AsInt64Slice()
+			actual := result.Int64Slice()
 
 			if !reflect.DeepEqual(actual, tc.out) {
 				t.Fatalf("Expected result to be %v items, instead got %v", tc.out, actual)
