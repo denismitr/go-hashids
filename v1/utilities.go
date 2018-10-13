@@ -98,7 +98,7 @@ func shuffle(in, salt []rune) (out []rune) {
 }
 
 func hexToNums(hex string) ([]int64, error) {
-	nums := make([]int64, len(hex))
+	nums := make([]int64, 0)
 
 	for i := 0; i < len(hex); i++ {
 		b := hex[i]
@@ -114,7 +114,7 @@ func hexToNums(hex string) ([]int64, error) {
 			return nil, fmt.Errorf("invalid hex digit")
 		}
 		// Each int is in range [16, 31]
-		nums[i] = 0x10 + int64(b)
+		nums = append(nums, 0x10+int64(b))
 	}
 
 	return nums, nil

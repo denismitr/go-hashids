@@ -56,14 +56,20 @@ func Test_CustomAlphabet(t *testing.T) {
 		"abcdefghPJHGDTWQSC",
 		"B)Wdkjwpouyftgnc!-hA",
 		"POVSMDCKARZXIEQJLB",
-		"123456789",
+		"123456789QWERTYL",
 		"ROF92813jdh4kpifcC7l",
+		"cCsSfFhHuUiItT01",
+		"abdegjklCFHISTUc",
+		"abdegjklmnopqrSF",
+		"abdegjklmnopqrvwxyzABDEGJKLMNOPQRVWXYZ1234567890",
+		"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890~!@#$%^&*()-_=+|",
+		"~!@#$%^&*()-_=+{[}]",
 	}
 
 	for _, alph := range alphs {
 		t.Run(fmt.Sprintf("Alphabet %s", alph), func(t *testing.T) {
 			options := DefaultOptions("test salt")
-			options.Length = 8
+			options.Length = 0
 			options.Alphabet = alph
 
 			o, err := New(options)

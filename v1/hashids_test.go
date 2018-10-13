@@ -25,6 +25,7 @@ func Test_EndodedAndDecodedValuesAreEqual(t *testing.T) {
 		{555777999, []int64{555777999}},
 		{10, []int64{10}},
 		{[]int64{1, 2, 3, 4, 5}, []int64{1, 2, 3, 4, 5}},
+		{[]int64{29, 30, 26, 29, 27, 30, 30, 31}, []int64{29, 30, 26, 29, 27, 30, 30, 31}},
 	}
 
 	o, _ := New(DefaultOptions("test salt"))
@@ -85,6 +86,7 @@ func Test_EncodeReturnsCorrectHash(t *testing.T) {
 		{[]int64{2, 24, 234567810}, "nG2fJTDWGebV", "test salt", 12},
 		{[]int64{2, 24, 234567810}, "w9XIviZljBvY", "another test salt", 12},
 		{[]int64{2, 24, 234567810}, "rBwGnG2fJTDWGebVP24d", "test salt", 20},
+		{[]int64{29, 30, 26, 29, 27, 30, 30, 31}, "lGDRWVzyXIkflC6IbSGfyfvqBM7m8w", "test salt", 30},
 	}
 
 	for _, tc := range tt {

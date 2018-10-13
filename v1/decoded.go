@@ -62,6 +62,9 @@ func (d DecodedNumbers) AsInt64Slice() []int64 {
 
 // AsHex returns result converted to hexidecimal format
 func (d DecodedNumbers) AsHex() (string, error) {
+	if d.err != nil {
+		return "", d.err
+	}
 	return numsToHex(d.numbers)
 }
 

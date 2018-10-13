@@ -6,9 +6,9 @@ import (
 )
 
 const (
-	defaultAlphabet   = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-	defaultMinLength  = 16
-	minAlphabetLength = 6
+	DefaultAlphabet   = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+	DefaultLength     = 16
+	MinAlphabetLength = 16
 
 	sepDiv      = 3.5
 	guardDiv    = 12.0
@@ -30,8 +30,8 @@ type Options struct {
 // DefaultOptions for the obfuscator
 func DefaultOptions(salt string) Options {
 	return Options{
-		Alphabet: defaultAlphabet,
-		Length:   defaultMinLength,
+		Alphabet: DefaultAlphabet,
+		Length:   DefaultLength,
 		Salt:     salt,
 	}
 }
@@ -56,13 +56,13 @@ func (o Options) validateAlphabet() ([]rune, error) {
 	var alphabetRunes []rune
 
 	if o.Alphabet == "" {
-		alphabetRunes = []rune(defaultAlphabet)
+		alphabetRunes = []rune(DefaultAlphabet)
 	} else {
 		alphabetRunes = []rune(o.Alphabet)
 	}
 
-	if len(alphabetRunes) < minAlphabetLength {
-		return nil, fmt.Errorf("Alphabet length must be at least %d", minAlphabetLength)
+	if len(alphabetRunes) < MinAlphabetLength {
+		return nil, fmt.Errorf("Alphabet length must be at least %d", MinAlphabetLength)
 	}
 
 	unique := make(map[rune]bool, len(alphabetRunes))

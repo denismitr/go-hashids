@@ -63,16 +63,30 @@ func (h *Hasher) Encode(v ...interface{}) (string, error) {
 				if err != nil {
 					return "", err
 				}
-				h.numbers = nums
-			} else {
-				return "", fmt.Errorf("unkown format of string")
+				return h.Encode(nums)
 			}
+
+			return "", fmt.Errorf("unkown format of string")
 		default:
 			return "", fmt.Errorf("Value must be of type int, int64 or slice of ints, or hex")
 		}
 	}
 
 	return h.encodeNumbers()
+}
+
+// EncodeHex - hexidecimal values
+func (h *Hasher) EncodeHex(hex string) (string, error) {
+	if isHex(hex) {
+		nums, err := hexToNums(hex)
+		if err != nil {
+			return "", err
+		}
+
+		return h.Encode(nums)
+	}
+
+	return "", fmt.Errorf("unkown format of string")
 }
 
 // Decode string hash
@@ -110,7 +124,10 @@ func (h *Hasher) Decode(input string) *DecodedNumbers {
 		}
 	}
 
-	check, _ := h.Encode(h.numbers)
+	check, err := h.Encode(h.numbers)
+	if err != nil {
+		return NewDecodedNumbers(nil, fmt.Errorf("Error when trying to verify result: %v", err))
+	}
 	if check != input {
 		return NewDecodedNumbers(nil,
 			fmt.Errorf("mismatch between encoded and decoded values: %s -> %s, obtained result %v", check, input, h.numbers))

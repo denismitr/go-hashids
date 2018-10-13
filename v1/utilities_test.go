@@ -122,12 +122,12 @@ func Test_ShuffleFunc(t *testing.T) {
 		salt []rune
 	}{
 		{
-			in:   []rune(defaultAlphabet),
+			in:   []rune(DefaultAlphabet),
 			salt: []rune("Test salt"),
 			out:  []rune("sI0gJwor67dkiH4EPKvfMjRAh8uFBSZzQcG5Op3DxTNYa1Lqy92XmbtWlCneVU"),
 		},
 		{
-			in:   []rune(defaultAlphabet),
+			in:   []rune(DefaultAlphabet),
 			salt: []rune("Another salt"),
 			out:  []rune("I9GNpMxeBgy5rYlzovXE31Z7nHcCVfOAtwRmaDWbuQhjkd02J84sFLKqPS6TUi"),
 		},
