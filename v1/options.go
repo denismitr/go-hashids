@@ -6,8 +6,12 @@ import (
 )
 
 const (
-	DefaultAlphabet   = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-	DefaultLength     = 16
+	// DefaultAlphabet - with all latin letters and all digits
+	DefaultAlphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+	// DefaultLength of the hash which is basically a minimal length of the hash
+	// Length will grow automatically as required
+	DefaultLength = 16
+	// MinAlphabetLength - custome alphabet cannot be smaller than this value
 	MinAlphabetLength = 16
 
 	sepDiv      = 3.5
