@@ -37,6 +37,20 @@ func New(options Options) (*Hasher, error) {
 	return h, nil
 }
 
+// SetPrefix explicitly
+func (h *Hasher) SetPrefix(prefix string) *Hasher {
+	h.options.Prefix = prefix
+
+	return h
+}
+
+// ClearPrefix explicitly
+func (h *Hasher) ClearPrefix() *Hasher {
+	h.options.Prefix = ""
+
+	return h
+}
+
 // Encode number, numbers or slice of numbers
 func (h *Hasher) Encode(v ...interface{}) (string, error) {
 	h.reset()

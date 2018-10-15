@@ -108,3 +108,71 @@ if err != nil {
 
 // hex = "abcddd6666ddeeeeeeeee" ATTENTION!!! all lower case
 ```
+
+#### Optional prefixing - making a Stripe style slug
+```go
+options := hashids.Options{
+    Length:   12,
+    Salt:     "some salt",
+    Alphabet: hashids.LowercaseAlphabetWithDigits,
+    Prefix:   "cus_",
+}
+
+h, err := New(options)
+if err != nil {
+    t.Fatal(err)
+}
+
+hash, err := h.Encode(156)
+if err != nil {
+    log.Fatal(err)
+}
+
+// hash == cus_2vk4e9xpeng7
+
+numbers, err := h.Decode(hash).Unwrap()
+if err != nil {
+    log.Fatal(err)
+}
+
+// numbers == []int64{156}
+// prefix will be stripped automatically during decode
+// as long as it was specified in the options or via a setter before decode
+```
+
+You may not always want to specify prefix when creating a new hasher (even though it is recommended). You have an option to set prefix and clear it with dedicated methods.
+
+```go
+
+options := hashids.Options{
+    Length:   12,
+    Salt:     "some salt",
+    Alphabet: hashids.LowercaseAlphabetWithDigits,
+}
+
+h, err := New(options)
+if err != nil {
+    t.Fatal(err)
+}
+
+h.SetPrefix("cus_")
+
+hash, err := h.Encode(156)
+if err != nil {
+    log.Fatal(err)
+}
+
+// hash == cus_2vk4e9xpeng7
+
+numbers, err := h.Decode(hash).Unwrap()
+if err != nil {
+    log.Fatal(err)
+}
+
+// numbers == []int64{156}
+// prefix will be stripped automatically during decode
+// as long as it was specified in the options or via a setter before decode
+
+h.ClearPrefix() // you can use this method to clear the prefix
+```
+
