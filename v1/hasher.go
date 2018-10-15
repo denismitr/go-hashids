@@ -3,6 +3,7 @@ package hashids
 import (
 	"fmt"
 	"math"
+	"time"
 )
 
 // Hasher is responsible for the encoding and decoding
@@ -101,6 +102,13 @@ func (h *Hasher) EncodeHex(hex string) (string, error) {
 	}
 
 	return "", fmt.Errorf("unkown format of string")
+}
+
+// EncodeTime object
+func (h *Hasher) EncodeTime(t time.Time) (string, error) {
+	timestamp := t.UnixNano()
+
+	return h.Encode(timestamp)
 }
 
 // Decode string hash

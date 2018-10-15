@@ -1,4 +1,5 @@
 ### GO Hashids
+This library can generate hashed/obfuscated ids from numbers. Usually this kind of functionality is required to create shorter slugs that don't reveal the DB incremental ids. The algorithm is reversable but you can use *salt* to make it more secure. However this algorithm is not suitable for cryptographical purpuses.
 
 #### Version 1
 
@@ -99,14 +100,14 @@ Another supported format is hexidecimal strings
 ```go
 // you can use a special method for it
 // that is designed aspecially 
-hash, _ := h.EncodeHex("ABCDDD6666DDEEEEEEEEE")
+hash, _ := h.EncodeHex("ABECDF53")
 
 hex, err := h.Decode(hash).AsHex()
 if err != nil {
     log.Fatal(err)
 }
 
-// hex = "abcddd6666ddeeeeeeeee" ATTENTION!!! all lower case
+// hex = "abecdf53" ATTENTION!!! all lower case
 ```
 
 #### Optional prefixing - making a Stripe style slug
@@ -155,9 +156,7 @@ if err != nil {
     t.Fatal(err)
 }
 
-h.SetPrefix("cus_")
-
-hash, err := h.Encode(156)
+hash, err := h.SetPrefix("cus_").Encode(156)
 if err != nil {
     log.Fatal(err)
 }
@@ -174,5 +173,30 @@ if err != nil {
 // as long as it was specified in the options or via a setter before decode
 
 h.ClearPrefix() // you can use this method to clear the prefix
+```
+
+#### Working with timestamps
+ATTENTION!!! Use this feature with caution. If you wany to create hashid from a timestamp, there is always a chance that in a concurrent application two timestamps generated in two different processes, goroutines or simply web requests may actually turn out to be totally identical up to a nanosecond.
+
+```go
+t := time.Now() // just for example
+
+h, err := New(hashids.DefaultOptions("salt"))
+if err != nil {
+    t.Fatal(err)
+}
+
+hash, err := h.EncodeTime(t)
+if err != nil {
+    t.Fatal(err)
+}
+
+u, err := h.Decode(hash).AsTime()
+if err != nil {
+    t.Fatal(err)
+}
+
+t.Equal(u) // true
+t.Sub(u).Nanoseconds() // 0 delta in nanoseconds 
 ```
 

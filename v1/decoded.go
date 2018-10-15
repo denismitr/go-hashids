@@ -1,5 +1,10 @@
 package hashids
 
+import (
+	"fmt"
+	"time"
+)
+
 // ResultMapFunc to go through all numbers in result
 type ResultMapFunc func(v int64, i int) int64
 
@@ -78,6 +83,21 @@ func (d DecodedResult) FirstInt64() (first int64) {
 // Int64Slice slice
 func (d DecodedResult) Int64Slice() []int64 {
 	return d.numbers
+}
+
+// AsTime transform result into time object and return it
+func (d DecodedResult) AsTime() (time.Time, error) {
+	if d.err != nil {
+		return time.Unix(0, 0), d.err
+	}
+
+	if len(d.numbers) != 1 {
+		return time.Unix(0, 0), fmt.Errorf("valid timestamp must be contained in a int64 slice as single value, got %v", d.numbers)
+	}
+
+	t := time.Unix(0, d.numbers[0])
+
+	return t, nil
 }
 
 // AsHex returns result converted to hexidecimal format
