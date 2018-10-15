@@ -8,6 +8,4 @@ services:
 install:
   - go get github.com/denismitr/go-hashids/v1
 
-matrix:
-  include:
-  - go: "go test -v ./v1/..."
+script: go test -v ./v1/...

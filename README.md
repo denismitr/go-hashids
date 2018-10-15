@@ -1,4 +1,6 @@
-### GO Hashids
+# GO Hashids
+[![Build Status](https://travis-ci.org/denismitr/go-hashids.svg?branch=master)](https://travis-ci.org/denismitr/go-hashids)
+
 This library can generate hashed/obfuscated ids from numbers. Usually this kind of functionality is required to create shorter slugs that don't reveal the DB incremental ids. The algorithm is reversable but you can use *salt* to make it more secure. However this algorithm is not suitable for cryptographical purpuses.
 
 #### Version 1
