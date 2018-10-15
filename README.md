@@ -54,13 +54,58 @@ numbers, err := h.Decode(hash).Unwrap()
 
 Default options
 ```go
-h, err := hashids.New(hashids.DefaultOptions("my salt"))
-if err != nil {
-    log.Fatal(err)
-}
+h, _ := hashids.New(hashids.DefaultOptions("my salt"))
 
 hash, _ := h.Encode(1, 2, 3)
 
 numbers, _ := h.Decode(hash).Unwrap()
 // numbers == []int64{1, 2, 3}
+```
+
+Available input formats
+* []int64
+* []int
+* int64
+* int
+* hexidecimal string
+
+```go
+options := hashids.Options{
+    Length:   8,
+    Salt:     "my salt",
+    Alphabet: hashids.DefaultAlphabet,
+}
+
+
+h, err := hashids.New(options)
+if err != nil {
+    log.Fatal(err)
+}
+
+// single value
+hash, _ := h.Encode(1) 
+// or multiple values
+hash, _ := h.Encode(1, 2, 3)
+// or
+hash, _ := h.Encode([]int{1, 2, 3})
+// or
+hash, _ := h.Encode([]int64{1, 2, 3})
+```
+
+#### Hexidecimal strings
+Another supported format is hexidecimal strings
+```go
+// another option is hex
+hash, _ := h.Encode("ABCDDD6666DDEEEEEEEEE")
+
+// you can use a special method for it
+// that is designed aspecially 
+hash, _ := h.EncodeHex("ABCDDD6666DDEEEEEEEEE")
+
+hex, err := h.Decode(hash).AsHex()
+if err != nil {
+    log.Fatal(err)
+}
+
+// hex = "abcddd6666ddeeeeeeeee" ATTENTION!!! all lower case
 ```
