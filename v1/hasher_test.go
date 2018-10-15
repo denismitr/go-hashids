@@ -24,6 +24,7 @@ func Test_EndodedAndDecodedValuesAreEqual(t *testing.T) {
 		{100, []int64{100}},
 		{555777999, []int64{555777999}},
 		{10, []int64{10}},
+		{[]int{5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}, []int64{5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}},
 		{[]int64{1, 2, 3, 4, 5}, []int64{1, 2, 3, 4, 5}},
 		{[]int64{29, 30, 26, 29, 27, 30, 30, 31}, []int64{29, 30, 26, 29, 27, 30, 30, 31}},
 	}
@@ -87,6 +88,12 @@ func Test_EncodeReturnsCorrectHash(t *testing.T) {
 		{[]int64{2, 24, 234567810}, "w9XIviZljBvY", "another test salt", 12},
 		{[]int64{2, 24, 234567810}, "rBwGnG2fJTDWGebVP24d", "test salt", 20},
 		{[]int64{29, 30, 26, 29, 27, 30, 30, 31}, "lGDRWVzyXIkflC6IbSGfyfvqBM7m8w", "test salt", 30},
+		{
+			[]int{1000000001, 1000000002, 1000000003, 1000000004, 1000000005},
+			"jOAab4REXGWr37ZKwoYMK758XDaxjkYv9Zb4VnWJ0ak5EnoY6JR8WDXPlpOZr7dr2bdevMmX9PjBow6EKVkR5EBr8QlA3bapo12ZX7GML5JMX0VDrGxRoYWjLbk25ePnAnYRdl5KAPLbZ6Qj9rxX48VOJxZwa5oX0jekKv2bQqYALbnpG2190mlExMZqj4RwoBe9YdAElDROnP0w2xJ1pGLQBMeRYVWGp4KXDQlvOb0mEBP69kdoDm7ZrEjKM2ABJYRqV1MwnRO76bJoYBG4eQ5P0EZrlKQbV08Zvxp97o3GPOAXYOxEnAMmXDKqRPvlwL4WakbVOlLPQBqo8DZKG6nkx7e3RkL3R9m4wJbQDOWd1a0jY65GDKEqMxp54wdYLrn7mVlR9e5BMOobw4Zv6dYQaPq78VRG2paRklKJ5rqPXb3vZLVY0PLKEqnd6VxA8ZbYJB7Oa95OPWdaYvn5R479q3V8AorxlN7VoaAn8TpLraRecE0n43nfYERBkoCBJ3L80zeG1wbB0LEQ6mjMJ2KpZXkDGlmj41okRDXwe0MWrvQp3287WdwnOM9EmQjo61DxBA4epJx2LmXAG9rE103KjDlknWejak0o2QW31bP8XOAvZB6JMxElA7GVoerXZnPpB8qv2K5vd2a0A1mjwp4rW9YXMEbJZJ5e31V9Y0B87odpG26rQjeda1kj2JE4wqD6WnBRm5LMVrLadx9mv8A2KkX3WjplDq3w5epl0vQaLbWG41POxX8nknjo1w87A392dra5ZJqx6LvMZqj46kom87XKra5WbV3eYX6Qa3Lrd7JPWVAvO8Kk5DVnW496mMpDPr18RlE7d3BGOa12Ep3wekBDMqm70voWGJ4w69BQZvlKOqE8dap3Jm17ked09jKVn6WOPqmDRwYx4vxZnOp0L73YDAJQl8q1GWa4mAq0Vwe1bx2GKjBMQv493LQ2wApd3lmr16GOoeLBPRqE5kpQdLV2DBxvnml86M9",
+			"my test salt",
+			999,
+		},
 	}
 
 	for _, tc := range tt {
@@ -113,7 +120,7 @@ func Test_EncodeReturnsCorrectHash(t *testing.T) {
 	}
 }
 
-func Test_EncodeReturnsCorrectInput(t *testing.T) {
+func Test_DecodeReturnsCorrectInput(t *testing.T) {
 	t.Parallel()
 
 	tt := []struct {
@@ -141,7 +148,7 @@ func Test_EncodeReturnsCorrectInput(t *testing.T) {
 	for _, tc := range tt {
 		tc := tc
 
-		t.Run(fmt.Sprintf("%s", tc.hash), func(t *testing.T) {
+		t.Run(fmt.Sprintf("Hash %s", tc.hash), func(t *testing.T) {
 			options := Options{
 				Length: tc.length,
 				Salt:   tc.salt,
