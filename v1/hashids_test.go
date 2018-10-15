@@ -42,7 +42,7 @@ func Test_EndodedAndDecodedValuesAreEqual(t *testing.T) {
 			result := o.Decode(hash)
 
 			if result.HasError() {
-				t.Fatal(result.Error())
+				t.Fatal(result.Err())
 			}
 
 			if result.Len() == 0 {

@@ -1,8 +1,9 @@
 package hashids
 
+// ResultMapFunc to go through all numbers in result
 type ResultMapFunc func(v int64, i int) int64
 
-// DecodedResult hash result
+// DecodedResult of the hash input
 type DecodedResult struct {
 	numbers []int64
 	err     error
@@ -31,8 +32,9 @@ func (d DecodedResult) Len() int {
 	return len(d.numbers)
 }
 
-func (d DecodedResult) Error() string {
-	return d.err.Error()
+// Err - get the error of the result
+func (d DecodedResult) Err() error {
+	return d.err
 }
 
 // Unwrap the raw result and error
@@ -55,6 +57,7 @@ func (d DecodedResult) IntSlice() []int {
 	return out
 }
 
+// FirstInt of the result
 func (d DecodedResult) FirstInt() (first int) {
 	if len(d.numbers) > 0 {
 		first = int(d.numbers[0])
@@ -63,6 +66,7 @@ func (d DecodedResult) FirstInt() (first int) {
 	return
 }
 
+// FirstInt64 of the result
 func (d DecodedResult) FirstInt64() (first int64) {
 	if len(d.numbers) > 0 {
 		first = d.numbers[0]
@@ -92,5 +96,5 @@ func (d DecodedResult) Map(f ResultMapFunc) DecodedResult {
 		result[i] = f(v, i)
 	}
 
-	return DecodedResult{result, nil}
+	return DecodedResult{result, d.err}
 }
