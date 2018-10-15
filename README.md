@@ -24,6 +24,8 @@ Available constants:
 ```go
 // DefaultAlphabet - with all latin letters and all digits
 DefaultAlphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+// LowercaseAlphabetWithDigits all latin lowercase characters and digits
+LowercaseAlphabetWithDigits = "abcdefghijklmnopqrstuvwxyz1234567890"
 // DefaultLength of the hash which is basically a minimal length of the hash
 // Length will grow automatically as required
 DefaultLength = 16
@@ -69,6 +71,7 @@ Available input formats
 * int64
 * int
 * hexidecimal string
+* time.Time
 
 ```go
 options := hashids.Options{
@@ -93,6 +96,10 @@ hash, _ := h.Encode(1, 2, 3)
 hash, _ := h.Encode([]int{1, 2, 3})
 // or
 hash, _ := h.Encode([]int64{1, 2, 3})
+// hexidecimal string
+hash, _ := h.Encode("ab1f")
+// time.Time
+hash, _ := h.Encode(time.Now())
 ```
 
 #### Hexidecimal strings
