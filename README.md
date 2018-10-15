@@ -5,8 +5,6 @@
 #### Author
 [Denis Mitrofanov](https://thecollection.ru)
 
-## COMING SOON!
-
 ### Usage
 
 ```go get https://github.com/denismitr/go-hashids/v1```
@@ -25,6 +23,7 @@ DefaultLength = 16
 MinAlphabetLength = 16
 ```
 
+Custom options
 ```go
 options := hashids.Options{
     Length:   16,
@@ -34,11 +33,27 @@ options := hashids.Options{
 
 h, err := hashids.New(options)
 if err != nil {
-    t.Fatal(err)
+    log.Fatal(err)
 }
 
 hash, err := h.Encode(1)
 if err != nil {
-    t.Fatal(err)
+    log.Fatal(err)
 }
+
+numbers, err := h.Decode(hash).Unwrap()
+// numbers == []int64{1}
+```
+
+Default options
+```go
+h, err := hashids.New(DefaultOptions("my salt"))
+if err != nil {
+    log.Fatal(err)
+}
+
+hash, _ := h.Encode(1, 2, 3)
+
+numbers, _ := h.Decode(hash).Unwrap()
+// numbers == []int64{1, 2, 3}
 ```
