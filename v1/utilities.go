@@ -3,6 +3,7 @@ package hashids
 import (
 	"encoding/hex"
 	"fmt"
+	"strings"
 )
 
 func createNumbersHashInt(slice []int64) int64 {
@@ -145,4 +146,16 @@ func isHex(s string) bool {
 	}
 
 	return true
+}
+
+func prependWithPrefix(hash, prefix string) string {
+	return prefix + hash
+}
+
+func removePrefix(hash, prefix string) string {
+	if prefix == "" {
+		return hash
+	}
+
+	return strings.TrimPrefix(hash, prefix)
 }

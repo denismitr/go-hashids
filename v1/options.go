@@ -8,6 +8,10 @@ import (
 const (
 	// DefaultAlphabet - with all latin letters and all digits
 	DefaultAlphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+
+	// LowercaseAlphabetWithDigits all latin lowercase characters and digits
+	LowercaseAlphabetWithDigits = "abcdefghijklmnopqrstuvwxyz1234567890"
+
 	// DefaultLength of the hash which is basically a minimal length of the hash
 	// Length will grow automatically as required
 	DefaultLength = 16
@@ -24,6 +28,7 @@ type Options struct {
 	Alphabet string
 	Length   int
 	Salt     string
+	Prefix   string
 
 	alphabet []rune
 	salt     []rune
@@ -84,6 +89,10 @@ func (o Options) validateAlphabet() ([]rune, error) {
 	}
 
 	return alphabetRunes, nil
+}
+
+func (o Options) hasPrefix() bool {
+	return o.Prefix != ""
 }
 
 // AlphabetAsSlice to use in algotithm

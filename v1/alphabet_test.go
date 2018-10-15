@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_MinLengthPadding(t *testing.T) {
@@ -88,6 +90,58 @@ func Test_CustomAlphabet(t *testing.T) {
 			if !reflect.DeepEqual(decoded, expected) {
 				t.Fatalf("Expected decoded result %v to be equal to input 1, 2, 3", decoded)
 			}
+		})
+	}
+}
+
+func Test_CustomeAlphabetWithPrefix(t *testing.T) {
+	t.Parallel()
+
+	tt := []struct {
+		value    interface{}
+		hash     string
+		salt     string
+		alphabet string
+		prefix   string
+		length   int
+	}{
+		{[]int64{1}, "joed16", "this is my salt", LowercaseAlphabetWithDigits, "cus_", 6},
+		{[]int64{1}, "0NV0", "this is my salt", DefaultAlphabet, "user_", 4},
+		{[]int64{1}, "тлпирп", "this is another salt", "абвгдежзиклмнпрсто1234", "order_", 6},
+		{[]int64{1, 3, 7}, "м2н8оБоз", "this is test salt", "98АБВГДЕжзиклмнпрсто1234", "преф_", 8},
+		{[]int64{1234, 33, 79}, "AB992794A6", "this is test salt", "1234567890_!&*BAZ", "baz_", 8},
+		{[]int64{1234, 33, 79}, "A*_8AB992794A687", "this is test salt", "1234567890_!&*BAZ", "", 16},
+	}
+
+	for _, tc := range tt {
+		tc := tc
+
+		t.Run(fmt.Sprintf("input %v", tc.value), func(t *testing.T) {
+			options := Options{
+				Length:   tc.length,
+				Salt:     tc.salt,
+				Alphabet: tc.alphabet,
+				Prefix:   tc.prefix,
+			}
+
+			o, err := New(options)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			hash, err := o.Encode(tc.value)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			assert.Equal(t, tc.prefix+tc.hash, hash)
+
+			result, err := o.Decode(hash).Unwrap()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			assert.Equal(t, tc.value, result)
 		})
 	}
 }

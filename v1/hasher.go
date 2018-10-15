@@ -93,6 +93,8 @@ func (h *Hasher) EncodeHex(hex string) (string, error) {
 func (h *Hasher) Decode(input string) *DecodedResult {
 	h.reset()
 
+	input = removePrefix(input, h.options.Prefix)
+
 	hashRunes := separate([]rune(input), h.options.guards)
 	i := 0
 	if len(hashRunes) == 2 || len(hashRunes) == 3 {
@@ -128,7 +130,7 @@ func (h *Hasher) Decode(input string) *DecodedResult {
 	if err != nil {
 		return NewDecodedResult(nil, fmt.Errorf("Error when trying to verify result: %v", err))
 	}
-	if check != input {
+	if removePrefix(check, h.options.Prefix) != input {
 		return NewDecodedResult(nil,
 			fmt.Errorf("mismatch between encoded and decoded values: %s -> %s, obtained result %v", check, input, h.numbers))
 	}
@@ -172,7 +174,7 @@ func (h *Hasher) encodeNumbers() (string, error) {
 
 	h.extendHash(alphabet, numbersHashInt)
 
-	return string(h.hash), nil
+	return h.getHashString(), nil
 }
 
 func (h *Hasher) extendHash(alphabet []rune, numbersHash int64) {
@@ -195,6 +197,14 @@ func (h *Hasher) extendHash(alphabet []rune, numbersHash int64) {
 			h.hash = h.hash[excess/2 : excess/2+h.options.Length]
 		}
 	}
+}
+
+func (h Hasher) getHashString() string {
+	if h.options.Prefix != "" {
+		return prependWithPrefix(string(h.hash), h.options.Prefix)
+	}
+
+	return string(h.hash)
 }
 
 func (h Hasher) getMaxResultLengthFor(slice []int64) int {
