@@ -90,7 +90,7 @@ func (h *Hasher) EncodeHex(hex string) (string, error) {
 }
 
 // Decode string hash
-func (h *Hasher) Decode(input string) *DecodedNumbers {
+func (h *Hasher) Decode(input string) *DecodedResult {
 	h.reset()
 
 	hashRunes := separate([]rune(input), h.options.guards)
@@ -118,7 +118,7 @@ func (h *Hasher) Decode(input string) *DecodedNumbers {
 			alphabet = shuffle(alphabet, h.buf[:len(alphabet)])
 			number, err := unhash(rs, alphabet)
 			if err != nil {
-				return NewDecodedNumbers(nil, err)
+				return NewDecodedResult(nil, err)
 			}
 			h.numbers = append(h.numbers, number)
 		}
@@ -126,14 +126,14 @@ func (h *Hasher) Decode(input string) *DecodedNumbers {
 
 	check, err := h.Encode(h.numbers)
 	if err != nil {
-		return NewDecodedNumbers(nil, fmt.Errorf("Error when trying to verify result: %v", err))
+		return NewDecodedResult(nil, fmt.Errorf("Error when trying to verify result: %v", err))
 	}
 	if check != input {
-		return NewDecodedNumbers(nil,
+		return NewDecodedResult(nil,
 			fmt.Errorf("mismatch between encoded and decoded values: %s -> %s, obtained result %v", check, input, h.numbers))
 	}
 
-	return NewDecodedNumbers(h.numbers, nil)
+	return NewDecodedResult(h.numbers, nil)
 }
 
 func (h *Hasher) encodeNumbers() (string, error) {

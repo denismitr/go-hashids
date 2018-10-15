@@ -2,15 +2,15 @@ package hashids
 
 type ResultMapFunc func(v int64, i int) int64
 
-// DecodedNumbers hash result
-type DecodedNumbers struct {
+// DecodedResult hash result
+type DecodedResult struct {
 	numbers []int64
 	err     error
 }
 
-// NewDecodedNumbers result
-func NewDecodedNumbers(numbers []int64, err error) *DecodedNumbers {
-	d := new(DecodedNumbers)
+// NewDecodedResult result
+func NewDecodedResult(numbers []int64, err error) *DecodedResult {
+	d := new(DecodedResult)
 	d.err = err
 
 	if numbers != nil {
@@ -22,26 +22,26 @@ func NewDecodedNumbers(numbers []int64, err error) *DecodedNumbers {
 }
 
 // HasError - whether result contains error
-func (d DecodedNumbers) HasError() bool {
+func (d DecodedResult) HasError() bool {
 	return d.err != nil
 }
 
 // Len of result
-func (d DecodedNumbers) Len() int {
+func (d DecodedResult) Len() int {
 	return len(d.numbers)
 }
 
-func (d DecodedNumbers) Error() string {
+func (d DecodedResult) Error() string {
 	return d.err.Error()
 }
 
 // Unwrap the raw result and error
-func (d DecodedNumbers) Unwrap() ([]int64, error) {
+func (d DecodedResult) Unwrap() ([]int64, error) {
 	return d.numbers, d.err
 }
 
 // IntSlice from result
-func (d DecodedNumbers) IntSlice() []int {
+func (d DecodedResult) IntSlice() []int {
 	if d.numbers == nil {
 		return nil
 	}
@@ -55,7 +55,7 @@ func (d DecodedNumbers) IntSlice() []int {
 	return out
 }
 
-func (d DecodedNumbers) FirstInt() (first int) {
+func (d DecodedResult) FirstInt() (first int) {
 	if len(d.numbers) > 0 {
 		first = int(d.numbers[0])
 	}
@@ -63,7 +63,7 @@ func (d DecodedNumbers) FirstInt() (first int) {
 	return
 }
 
-func (d DecodedNumbers) FirstInt64() (first int64) {
+func (d DecodedResult) FirstInt64() (first int64) {
 	if len(d.numbers) > 0 {
 		first = d.numbers[0]
 	}
@@ -72,12 +72,12 @@ func (d DecodedNumbers) FirstInt64() (first int64) {
 }
 
 // Int64Slice slice
-func (d DecodedNumbers) Int64Slice() []int64 {
+func (d DecodedResult) Int64Slice() []int64 {
 	return d.numbers
 }
 
 // AsHex returns result converted to hexidecimal format
-func (d DecodedNumbers) AsHex() (string, error) {
+func (d DecodedResult) AsHex() (string, error) {
 	if d.err != nil {
 		return "", d.err
 	}
@@ -85,12 +85,12 @@ func (d DecodedNumbers) AsHex() (string, error) {
 }
 
 // Map over the results
-func (d DecodedNumbers) Map(f ResultMapFunc) DecodedNumbers {
+func (d DecodedResult) Map(f ResultMapFunc) DecodedResult {
 	result := make([]int64, len(d.numbers))
 
 	for i, v := range d.numbers {
 		result[i] = f(v, i)
 	}
 
-	return DecodedNumbers{result, nil}
+	return DecodedResult{result, nil}
 }
