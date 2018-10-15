@@ -84,6 +84,8 @@ if err != nil {
 
 // single value
 hash, _ := h.Encode(1) 
+// or
+hash, _ := h.Encode(int64(1)) 
 // or multiple values
 hash, _ := h.Encode(1, 2, 3)
 // or
