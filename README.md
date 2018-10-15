@@ -97,9 +97,6 @@ hash, _ := h.Encode([]int64{1, 2, 3})
 #### Hexidecimal strings
 Another supported format is hexidecimal strings
 ```go
-// another option is hex
-hash, _ := h.Encode("ABCDDD6666DDEEEEEEEEE")
-
 // you can use a special method for it
 // that is designed aspecially 
 hash, _ := h.EncodeHex("ABCDDD6666DDEEEEEEEEE")
