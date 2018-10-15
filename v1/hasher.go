@@ -73,17 +73,11 @@ func (h *Hasher) Encode(v ...interface{}) (string, error) {
 		case int:
 			h.numbers = append(h.numbers, int64(value))
 		case string:
-			if isHex(value) {
-				nums, err := hexToNums(value)
-				if err != nil {
-					return "", err
-				}
-				return h.Encode(nums)
-			}
-
-			return "", fmt.Errorf("unkown format of string")
+			return h.EncodeHex(value)
+		case time.Time:
+			return h.EncodeTime(value)
 		default:
-			return "", fmt.Errorf("Value must be of type int, int64 or slice of ints, or hex")
+			return "", fmt.Errorf("input must be of type int, int64 or slice of ints, string with hex, %T given", value)
 		}
 	}
 

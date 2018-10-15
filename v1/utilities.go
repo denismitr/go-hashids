@@ -112,7 +112,7 @@ func hexToNums(hex string) ([]int64, error) {
 		case (b >= 'A') && (b <= 'F'):
 			b -= ('A' - 0xA)
 		default:
-			return nil, fmt.Errorf("invalid hex digit")
+			return nil, fmt.Errorf("not a hexidecimal character %v", b)
 		}
 		// Each int is in range [16, 31]
 		nums = append(nums, 0x10+int64(b))

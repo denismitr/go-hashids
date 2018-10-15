@@ -270,45 +270,28 @@ func Test_DefaultOptions_Length(t *testing.T) {
 	assert.Equal(t, numbers, result)
 }
 
-func Test_HexEncodedAndDecodedValuesAreEqual(t *testing.T) {
+func Test_InvalidInput(t *testing.T) {
 	tt := []struct {
-		hex      string
-		expected string
-		salt     string
-		length   int
+		input interface{}
+		t     string
 	}{
-		{"5a74d76ac89b05000e977baa", "qmTqfesOIqHrsoCYf9UkFZixSKuBT4umuruXuMiDsVsbSrfV", "this is my salt", 30},
-		{"5a74d76ac89b05000e977baa", "r6sdC0iBF5IXiZU3CQuLT1HJSofDs3fvfMfXfdHjivibS8Cw", "test salt", 18},
-		{"111aff", "5JqQ5h6hYhjCyhgqjL", "test salt", 18},
-		{"111affe", "Yzx1hmh6hKCyhvhNPb", "test salt", 18},
-		{"1a", "XBe7QdP7Wh5PMa8Ojy", "test salt", 18},
-		{"1", "O35oKBgz41PVdL9MQA", "test salt", 18},
-		{"1", "gz41PV", "test salt", 6},
-		{"2", "9VbdrOYnAYnxDlLEWj", "test salt", 18},
+		{false, fmt.Sprintf("%T", false)},
+		{nil, fmt.Sprintf("%T", nil)},
+		{new(struct{}), fmt.Sprintf("%T", new(struct{}))},
 	}
 
 	for _, tc := range tt {
 		tc := tc
 
-		t.Run(tc.hex, func(t *testing.T) {
-			options := DefaultOptions(tc.salt)
-			options.Length = tc.length
+		t.Run(fmt.Sprintf("Input type %T", tc.input), func(t *testing.T) {
+			h, _ := New(DefaultOptions("some salt"))
 
-			o, _ := New(options)
-
-			hash, err := o.Encode(tc.hex)
-			if err != nil {
-				t.Fatal(err)
+			_, err := h.Encode(tc.input)
+			if err == nil {
+				t.Fatal("err should not be nil")
 			}
 
-			assert.Equal(t, tc.expected, hash)
-
-			hex, err := o.Decode(hash).AsHex()
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			assert.Equal(t, tc.hex, hex)
+			assert.Contains(t, err.Error(), tc.t)
 		})
 	}
 }
