@@ -6,7 +6,7 @@ services:
   - docker
 
 install:
-  - go get https://github.com/denismitr/go-hashids/v1
+  - go get github.com/denismitr/go-hashids/v1
 
 matrix:
   include:

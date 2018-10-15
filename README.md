@@ -8,7 +8,7 @@ This library can generate hashed/obfuscated ids from numbers. Usually this kind 
 
 ### Usage
 
-```go get https://github.com/denismitr/go-hashids/v1```
+```go get github.com/denismitr/go-hashids/v1```
 
 ##### Public API
 
