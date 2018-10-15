@@ -11,6 +11,13 @@
 
 ##### Public API
 
+Import
+```go
+import (
+	hashids "github.com/denismitr/go-hashids/v1"
+)
+```
+
 Available constants:
 
 ```go
@@ -47,7 +54,7 @@ numbers, err := h.Decode(hash).Unwrap()
 
 Default options
 ```go
-h, err := hashids.New(DefaultOptions("my salt"))
+h, err := hashids.New(hashids.DefaultOptions("my salt"))
 if err != nil {
     log.Fatal(err)
 }
