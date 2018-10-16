@@ -113,25 +113,25 @@ func (h *Hasher) Decode(input string) *DecodedResult {
 	h.reset()
 
 	input = removePrefix(input, h.options.Prefix)
-
-	hashRunes := separate([]rune(input), h.options.guards)
+	hashGroups := separate([]rune(input), h.options.guards)
 	i := 0
-	if len(hashRunes) == 2 || len(hashRunes) == 3 {
+
+	if len(hashGroups) == 2 || len(hashGroups) == 3 {
 		i = 1
 	}
 
-	breakdown := hashRunes[i]
+	breakdown := hashGroups[i]
 
 	if len(breakdown) == 0 {
-		breakdown = hashRunes[0]
+		breakdown = hashGroups[0]
 	}
 
 	if len(breakdown) > 0 {
 		lottery := breakdown[0]
 		breakdown = breakdown[1:]
-		hashRunes = separate(breakdown, h.options.seps)
+		hashGroups = separate(breakdown, h.options.seps)
 		alphabet := h.options.alphabetCopy()
-		for _, rs := range hashRunes {
+		for _, rs := range hashGroups {
 			h.buf = h.buf[:1]
 			h.buf[0] = lottery
 			h.buf = append(h.buf, h.options.salt...)
@@ -145,16 +145,24 @@ func (h *Hasher) Decode(input string) *DecodedResult {
 		}
 	}
 
-	check, err := h.Encode(h.numbers)
-	if err != nil {
-		return NewDecodedResult(nil, fmt.Errorf("Error when trying to verify result: %v", err))
-	}
-	if removePrefix(check, h.options.Prefix) != input {
-		return NewDecodedResult(nil,
-			fmt.Errorf("mismatch between encoded and decoded values: %s -> %s, obtained result %v", check, input, h.numbers))
+	if err := h.checkDecode(input); err != nil {
+		return NewDecodedResult(nil, err)
 	}
 
 	return NewDecodedResult(h.numbers, nil)
+}
+
+func (h *Hasher) checkDecode(input string) error {
+	check, err := h.Encode(h.numbers)
+	if err != nil {
+		return fmt.Errorf("error when trying to verify result: %v", err)
+	}
+
+	if removePrefix(check, h.options.Prefix) != input {
+		return fmt.Errorf("mismatch between encoded and decoded values: %s -> %s, obtained result %v", check, input, h.numbers)
+	}
+
+	return nil
 }
 
 func (h *Hasher) encodeNumbers() (string, error) {
