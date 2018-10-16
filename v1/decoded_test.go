@@ -101,7 +101,11 @@ func Test_ItCanGetResultAsInt64Slice(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			result := NewDecodedResult(tc.numbers, tc.err)
 
-			numbers := result.Int64Slice()
+			numbers, err := result.Int64Slice()
+			if tc.err != nil && err == nil {
+				t.Fatalf("expected an error %v", tc.err)
+			}
+
 			assert.IsType(t, *new([]int64), numbers)
 
 			if tc.err != nil {
@@ -119,7 +123,11 @@ func Test_ItCanGetResultAsIntSlice(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			result := NewDecodedResult(tc.numbers, tc.err)
 
-			numbers := result.IntSlice()
+			numbers, err := result.IntSlice()
+			if tc.err != nil && err == nil {
+				t.Fatalf("expected an error %v", tc.err)
+			}
+
 			assert.IsType(t, *new([]int), numbers)
 
 			if tc.err != nil {
@@ -137,7 +145,11 @@ func Test_ItCanGetResultAsFirstInt64(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			result := NewDecodedResult(tc.numbers, tc.err)
 
-			number := result.FirstInt64()
+			number, err := result.FirstInt64()
+			if tc.err != nil && err == nil {
+				t.Fatalf("expected an error %v", tc.err)
+			}
+
 			assert.IsType(t, *new(int64), number)
 
 			if tc.err != nil {
@@ -157,7 +169,11 @@ func Test_ItCanGetResultAsFirstInt(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			result := NewDecodedResult(tc.numbers, tc.err)
 
-			number := result.FirstInt()
+			number, err := result.FirstInt()
+			if tc.err != nil && err == nil {
+				t.Fatalf("expected an error %v", tc.err)
+			}
+
 			assert.IsType(t, *new(int), number)
 
 			if tc.err != nil {

@@ -48,9 +48,9 @@ func (d DecodedResult) Unwrap() ([]int64, error) {
 }
 
 // IntSlice from result
-func (d DecodedResult) IntSlice() []int {
-	if d.numbers == nil {
-		return nil
+func (d DecodedResult) IntSlice() ([]int, error) {
+	if d.err != nil {
+		return nil, d.err
 	}
 
 	out := make([]int, 0)
@@ -59,30 +59,42 @@ func (d DecodedResult) IntSlice() []int {
 		out = append(out, int(v))
 	}
 
-	return out
+	return out, nil
 }
 
 // FirstInt of the result
-func (d DecodedResult) FirstInt() (first int) {
-	if len(d.numbers) > 0 {
-		first = int(d.numbers[0])
+func (d DecodedResult) FirstInt() (int, error) {
+	if d.err != nil {
+		return 0, d.err
 	}
 
-	return
+	if len(d.numbers) > 0 {
+		return int(d.numbers[0]), nil
+	}
+
+	return 0, fmt.Errorf("empty result")
 }
 
 // FirstInt64 of the result
-func (d DecodedResult) FirstInt64() (first int64) {
-	if len(d.numbers) > 0 {
-		first = d.numbers[0]
+func (d DecodedResult) FirstInt64() (int64, error) {
+	if d.err != nil {
+		return 0, d.err
 	}
 
-	return
+	if len(d.numbers) > 0 {
+		return d.numbers[0], nil
+	}
+
+	return 0, fmt.Errorf("empty result")
 }
 
 // Int64Slice slice
-func (d DecodedResult) Int64Slice() []int64 {
-	return d.numbers
+func (d DecodedResult) Int64Slice() ([]int64, error) {
+	if d.err != nil {
+		return nil, d.err
+	}
+
+	return d.numbers, nil
 }
 
 // AsTime transform result into time object and return it
