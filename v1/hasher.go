@@ -52,7 +52,10 @@ func (h *Hasher) ClearPrefix() *Hasher {
 	return h
 }
 
-// Encode number, numbers or slice of numbers
+// Encode a number or a group of numbers
+// accepts int, int64, []int, []int64, hexidecimal string, time.Time
+// in case of time.Time a UnixNano() method will be called to retieve
+// timestamp in nanoseconds
 func (h *Hasher) Encode(v ...interface{}) (string, error) {
 	h.reset()
 
