@@ -59,11 +59,11 @@ numbers, err := h.Decode(hash).Unwrap()
 
 Default options
 ```go
-h, _ := hashids.New(hashids.DefaultOptions("my salt"))
+h, err := hashids.New(hashids.DefaultOptions("my salt"))
 
-hash, _ := h.Encode(1, 2, 3)
+hash, err := h.Encode(1, 2, 3)
 
-numbers, _ := h.Decode(hash).Unwrap()
+numbers, err := h.Decode(hash).Unwrap()
 // numbers == []int64{1, 2, 3}
 ```
 
@@ -104,7 +104,16 @@ hash, _ := h.Encode("ab1f")
 hash, _ := h.Encode(time.Now())
 ```
 
-#### Hexidecimal strings
+### Retrieving results of the Decode method
+Decoding of hashes always yields an `[]int64` slice, wrapped by `DecodedResult` struct. You can retrieve that slice by using `Unwrap()` method. It will return `[]int64` and `error`.
+Apart from the `Unwrap()` method that simply returns decoded number/numbers always as `[]int64` slice and the `error`. There are a number of helper method on `DecodedResult` to retieve result as the desired type:
+
+* `FirstInt()` returns `int` and `error` - when you know for sure that you encoded a single `int` number  
+* `FirstInt64()` returns `int64` and `error` - when you know you for sure that you encoded a single `int64` number 
+* `IntSlice()` returns `[]int` and `error`
+* `Int64Slice` - essentially equal to `Unwrap()` 
+
+### Hexidecimal strings
 Another supported format is hexidecimal strings
 ```go
 // you can use a special method for it
@@ -119,7 +128,7 @@ if err != nil {
 // hex = "abecdf53" ATTENTION!!! all lower case
 ```
 
-#### Optional prefixing - making a Stripe style slug
+### Optional prefixing - making a Stripe style slug
 ```go
 options := hashids.Options{
     Length:   12,

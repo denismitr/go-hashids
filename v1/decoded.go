@@ -90,11 +90,7 @@ func (d DecodedResult) FirstInt64() (int64, error) {
 
 // Int64Slice slice
 func (d DecodedResult) Int64Slice() ([]int64, error) {
-	if d.err != nil {
-		return nil, d.err
-	}
-
-	return d.numbers, nil
+	return d.Unwrap()
 }
 
 // AsTime transform result into time object and return it
